@@ -401,6 +401,39 @@ For each improvement:
 - If stuck after 3 tries, revert with: git checkout -- . (keeps previous commits)
 - Commit: git add -A && git commit -m "Day $DAY ($SESSION_TIME): <short description>"
 
+=== PHASE 4.5: Proof Obligations ===
+
+Read $EVOLVE_DIR/REQUIREMENTS.md. If the file doesn't exist or is empty, skip this phase.
+
+Compute scope intersection: which REQs touch files you changed this session?
+Use the Scope patterns in each REQ (globs like src/auth/*, route patterns like POST /auth/login).
+A REQ applies if any file you changed matches its scope.
+
+For each intersecting REQ:
+  - Skip if status is "waived" and waiver has not expired
+  - Run the obligation tests/checks for each assigned gate
+  - Capture the output (last 200 lines) and write to .evolve/evidence/REQ-XXXX/<day>-<commit>-<gate>.txt
+  - If obligations pass:
+      Update status to "satisfied"
+      Add "Satisfied by: Day $DAY, commit <short sha>"
+  - If obligations fail on a previously "satisfied" REQ:
+      Mark status "regressed"
+      Regressed REQs block the commit — fix them before proceeding to Phase 5
+
+For each new failure encountered this session that hasn't been captured yet:
+  - Create a new REQ entry at the bottom of $EVOLVE_DIR/REQUIREMENTS.md
+  - Assign gate obligations based on failure type (build error → [BUILD], test failure → [UNIT], API issue → [UNIT, CONTRACT])
+  - Set source to "Day $DAY agent self-assessment"
+  - Write test stubs if evidence tests don't exist yet
+
+When you addressed a GitHub issue this session (from ISSUES_TODAY.md):
+  - After implementing the fix, create a REQ with Source: "GitHub issue #N"
+  - Assign obligations based on the issue type
+  - Run the obligations and capture evidence
+
+Commit all changes to REQUIREMENTS.md and evidence files:
+git add $EVOLVE_DIR/REQUIREMENTS.md && git commit -m "Day $DAY ($SESSION_TIME): update proof obligations"
+
 === PHASE 5: Update Spec Progress ===
 
 After implementing features from $EVOLVE_DIR/spec.md, update the checkboxes:
@@ -536,6 +569,27 @@ FIXEOF
             echo "  Build: FAIL after $FIX_ATTEMPTS fix attempts — reverting to pre-session state"
             git checkout "$SESSION_START_SHA" -- "$PROJECT_DIR/"
             git add -A && git commit -m "Day $DAY ($SESSION_TIME): revert session changes (could not fix build)" || true
+
+            # PROOF9: Auto-capture REQ from revert
+            # $ERRORS was captured before ERRORS_FILE was deleted — use it directly
+            if [ -f "$EVOLVE_DIR/REQUIREMENTS.md" ]; then
+                REQ_COUNT=$(grep -c '^## REQ-' "$EVOLVE_DIR/REQUIREMENTS.md" 2>/dev/null || echo 0)
+                NEXT_REQ_NUM=$(printf "%04d" $((REQ_COUNT + 1)))
+                ERROR_SUMMARY=$(printf '%s' "$ERRORS" | tail -c 200 | tr '\n' ' ' | tr -cd '[:print:]')
+                # Assign gates heuristically from error text
+                REQ_GATES="[BUILD]"
+                if printf '%s' "$ERRORS" | grep -qi "test\|spec\|assert\|jest\|pytest"; then
+                    REQ_GATES="[UNIT, BUILD]"
+                fi
+                REQ_TITLE="Build failed after revert — $(printf '%s' "$ERROR_SUMMARY" | cut -c1-60)"
+                # Use src/** as scope (broad but avoids literal PROJECT_DIR expansion issues)
+                REQ_SCOPE="src/**,**/*.ts,**/*.py,**/*.js"
+                printf '\n## REQ-%s: %s\n- **Source**: Day %s session revert\n- **Severity**: high\n- **Scope**: %s\n- **Obligations**: %s\n- **Evidence**: (none yet)\n- **Status**: open\n' \
+                    "$NEXT_REQ_NUM" "$REQ_TITLE" "$DAY" "$REQ_SCOPE" "$REQ_GATES" \
+                    >> "$EVOLVE_DIR/REQUIREMENTS.md"
+                git add "$EVOLVE_DIR/REQUIREMENTS.md" && git commit -m "Day $DAY ($SESSION_TIME): auto-capture REQ-${NEXT_REQ_NUM} from revert" || true
+                echo "  PROOF9: Created REQ-${NEXT_REQ_NUM} from session revert"
+            fi
         fi
     done
 fi
