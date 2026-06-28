@@ -5,6 +5,10 @@ import readline from 'readline';
 import { getEvolveDir, projectFile, evolveFile, isInitialized, EVOLVE_DIR_NAME } from '../utils/paths';
 
 const CRON_MARKER = 'code-evolve';
+// Stable marker embedded in the workflow templates so eject recognizes files it
+// installed regardless of which package version wrote them (kept in sync with
+// templates/workflows/*.yml). A user's own same-named workflow won't contain it.
+const WORKFLOW_MARKER = 'code-evolve:managed';
 
 export const ejectCommand = new Command('eject')
   .description('Remove code-evolve framework, keep project files')
@@ -52,11 +56,27 @@ export const ejectCommand = new Command('eject')
     fs.rmSync(evolveDir, { recursive: true, force: true });
     console.log('Removed .evolve/');
 
-    // Remove evolve workflow directory
-    const evolveWorkflowDir = projectFile('.github/workflows/evolve');
-    if (fs.existsSync(evolveWorkflowDir)) {
-      fs.rmSync(evolveWorkflowDir, { recursive: true, force: true });
-      console.log('Removed .github/workflows/evolve/');
+    // Remove only the workflow files we installed. init skips same-named files it didn't
+    // create, so eject must do the same — recognize ours by the embedded marker (stable
+    // across package versions), never removing a user's own evolve.yml/evolve-ci.yml.
+    for (const wf of ['.github/workflows/evolve.yml', '.github/workflows/evolve-ci.yml']) {
+      const wfPath = projectFile(wf);
+      if (!fs.existsSync(wfPath)) continue;
+      const isOurs = fs.readFileSync(wfPath, 'utf8').includes(WORKFLOW_MARKER);
+      if (isOurs) {
+        fs.rmSync(wfPath, { force: true });
+        console.log(`Removed ${wf}`);
+      } else {
+        console.log(`  ${wf} is not code-evolve-managed — leaving in place`);
+      }
+    }
+    // We deliberately do NOT auto-remove a legacy .github/workflows/evolve/ subdir from
+    // pre-relocation installs: those nested files never executed (GitHub ignores subdirs),
+    // so they're inert, and we can't prove ownership of a user dir named evolve/ without
+    // risking data loss. If present, tell the user so they can delete it themselves.
+    const legacyWorkflowDir = projectFile('.github/workflows/evolve');
+    if (fs.existsSync(legacyWorkflowDir)) {
+      console.log('  Note: a legacy .github/workflows/evolve/ directory exists (inert) — remove it manually if it was code-evolve\'s.');
     }
 
     // Clean .gitignore entries

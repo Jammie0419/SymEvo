@@ -130,13 +130,39 @@ export const initCommand = new Command('init')
       }
     }
 
-    // Install GitHub Actions workflows into namespaced subdirectory
-    if (options.withCi) {
+    // Install GitHub Actions workflows directly into .github/workflows/ so they actually run.
+    // (GitHub only executes workflows located directly in .github/workflows/, not subdirectories.)
+    // Renamed to evolve-* so they never clobber a target repo's own ci.yml/evolve.yml.
+    // The bundled CI workflow is Claude-only today (installs claude-code, uses
+    // ANTHROPIC_API_KEY). Skip the install for other backends rather than schedule a
+    // workflow that would run the wrong agent / fail every cycle. Tracked for per-agent CI.
+    if (options.withCi && agent !== 'claude') {
+      console.warn(
+        `  ⚠ Skipping GitHub Actions install: the bundled workflow supports the Claude backend only and would run the wrong agent in CI. Use local execution (code-evolve start) for "${agent}". Per-agent CI is tracked as a follow-up.`
+      );
+    } else if (options.withCi) {
       console.log('Installing GitHub Actions workflows...');
-      const workflowDir = projectFile('.github/workflows/evolve');
+      const workflowDir = projectFile('.github/workflows');
       fs.mkdirSync(workflowDir, { recursive: true });
-      // Only copy workflow files that don't already exist
-      copyDirSafe(path.join(templatesDir, 'workflows'), workflowDir);
+      const workflowMap: Record<string, string> = {
+        'evolve.yml': 'evolve.yml',
+        'ci.yml': 'evolve-ci.yml',
+      };
+      for (const [src, destName] of Object.entries(workflowMap)) {
+        const srcPath = path.join(templatesDir, 'workflows', src);
+        const destPath = path.join(workflowDir, destName);
+        if (!fs.existsSync(srcPath)) continue;
+        if (fs.existsSync(destPath)) {
+          // A same-named file already exists — leave it untouched, but make clear our
+          // workflow was NOT installed so the user knows evolution/CI won't run from it.
+          console.warn(
+            `  ⚠ ${path.relative(process.cwd(), destPath)} already exists — skipping; code-evolve's ${destName} was NOT installed (rename or remove the existing file to install it)`
+          );
+        } else {
+          fs.copyFileSync(srcPath, destPath);
+          console.log(`  Created ${path.relative(process.cwd(), destPath)}`);
+        }
+      }
     }
 
     // Update .gitignore (appends only if marker not already present)
@@ -178,24 +204,6 @@ function copyDir(src: string, dest: string): void {
       copyDir(srcPath, destPath);
     } else {
       fs.copyFileSync(srcPath, destPath);
-    }
-  }
-}
-
-/** Copy directory recursively, skipping files that already exist. */
-function copyDirSafe(src: string, dest: string): void {
-  fs.mkdirSync(dest, { recursive: true });
-  const entries = fs.readdirSync(src, { withFileTypes: true });
-  for (const entry of entries) {
-    const srcPath = path.join(src, entry.name);
-    const destPath = path.join(dest, entry.name);
-    if (entry.isDirectory()) {
-      copyDirSafe(srcPath, destPath);
-    } else if (fs.existsSync(destPath)) {
-      console.log(`  ${path.relative(process.cwd(), destPath)} already exists — skipping`);
-    } else {
-      fs.copyFileSync(srcPath, destPath);
-      console.log(`  Created ${path.relative(process.cwd(), destPath)}`);
     }
   }
 }
