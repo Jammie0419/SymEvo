@@ -399,6 +399,10 @@ Stops the engine, removes `.evolve/` and workflows. Your `vision.md` and `spec.m
 - An AI coding agent: [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Codex](https://github.com/openai/codex), [OpenCode](https://github.com/opencode-ai/opencode), or [Ollama](https://ollama.ai)
 - API key for your chosen agent (not needed for Ollama)
 
+## The Story
+
+Why I built this: [I Built a Codebase That Builds Itself](https://lab.frankbria.com/posts/i-built-a-codebase-that-builds-itself/).
+
 ## Roadmap
 
 - **Skill/plugin format** — install as a Claude Code skill, Codex plugin, etc.
