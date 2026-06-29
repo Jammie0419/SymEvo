@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import fs from 'fs';
 import path from 'path';
 import { Command } from 'commander';
 import { initCommand } from './commands/init';
@@ -15,12 +16,19 @@ import { proofCommand } from './commands/proof';
 
 const rawName = path.basename(process.argv[1]);
 const binName = rawName === 'ce' ? 'ce' : 'code-evolve';
+
+// Single source of truth for the version: read it from package.json (shipped in
+// the tarball) so the CLI and package.json can never drift apart.
+const { version } = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'),
+);
+
 const program = new Command();
 
 program
   .name(binName)
   .description('Self-evolving project builder powered by Claude Code')
-  .version('0.1.0');
+  .version(version);
 
 program.addCommand(initCommand);
 program.addCommand(setupCommand);
