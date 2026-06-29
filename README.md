@@ -29,6 +29,8 @@ Day 14 — Your project works. You barely touched a keyboard.
 
 ## Getting Started: New Project
 
+> **Detailed install, agent setup, verification, and troubleshooting:** see [INSTALL.md](INSTALL.md).
+
 Starting from scratch? Three steps:
 
 ### 1. Initialize
@@ -167,6 +169,7 @@ All commands are available as both `code-evolve <cmd>` and `ce <cmd>`.
 | `code-evolve run` | Run one cycle manually |
 | `code-evolve status` | Check progress — day count, features done, schedule |
 | `code-evolve eject` | Remove the framework, keep everything the agent built |
+| `code-evolve proof` | PROOF9 quality gates and requirements management ([docs](docs/PROOF9.md)) |
 
 ### `setup`
 
