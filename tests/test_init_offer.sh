@@ -1,5 +1,5 @@
 #!/bin/bash
-# Test: `code-evolve init` offers the vision + spec interviews on a TTY, but on
+# Test: `symevo init` offers the vision + spec interviews on a TTY, but on
 # piped (non-TTY) stdin it stays silent and keeps the manual "edit these files"
 # guidance — so CI / scripted installs are unaffected.
 # Regression test for issue #22 (P1.3).

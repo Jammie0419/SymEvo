@@ -15,7 +15,7 @@ import { specCommand } from './commands/spec';
 import { proofCommand } from './commands/proof';
 
 const rawName = path.basename(process.argv[1]);
-const binName = rawName === 'ce' ? 'ce' : 'code-evolve';
+const binName = rawName === 'se' ? 'se' : 'symevo';
 
 // Single source of truth for the version: read it from package.json (shipped in
 // the tarball) so the CLI and package.json can never drift apart.

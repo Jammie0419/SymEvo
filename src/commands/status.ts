@@ -8,7 +8,7 @@ export const statusCommand = new Command('status')
   .description('Show current evolution state')
   .action(async () => {
     if (!isInitialized()) {
-      console.error('Not initialized. Run `code-evolve init` first.');
+      console.error('Not initialized. Run `symevo init` first.');
       process.exit(1);
     }
 
@@ -90,10 +90,10 @@ export const statusCommand = new Command('status')
 
     const scheduleLine = schedule
       ? `every ${schedule.every}h (${schedule.model})`
-      : 'not scheduled (run: code-evolve start)';
+      : 'not scheduled (run: symevo start)';
 
     const humanReadable = [
-      `code-evolve status`,
+      `symevo status`,
       `  Day:      ${dayCount}`,
       `  Started:  ${birthDate}`,
       `  Mode:     ${mode ?? 'not set'}`,

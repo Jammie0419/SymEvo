@@ -27,7 +27,7 @@ export const visionCommand = new Command('vision')
 
     try {
       console.log('');
-      console.log('=== code-evolve: Vision Interview ===');
+      console.log('=== symevo: Vision Interview ===');
       console.log('');
       console.log("I'll ask you a series of questions to help shape your project vision.");
       console.log('Answer naturally — short or long is fine. Say "skip" to move on.');
@@ -118,7 +118,7 @@ export const visionCommand = new Command('vision')
       console.log('');
       console.log('Written to .evolve/vision.md');
       console.log('');
-      console.log('Next: edit .evolve/spec.md to define features, then run `code-evolve run` to start building.');
+      console.log('Next: edit .evolve/spec.md to define features, then run `symevo run` to start building.');
     } finally {
       rl.close();
     }

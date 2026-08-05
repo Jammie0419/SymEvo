@@ -16,7 +16,7 @@ SymEvo 是什么？外环（进化用户项目）、内环（进化自己）、�
 - 唯一的"人"节点，放顶部居中。
 - 标注：人工负责初始 vision/spec、审阅、npm publish 发布。
 
-### 第 2 层 · 控制面：code-evolve CLI（蓝）
+### 第 2 层 · 控制面：symevo CLI（蓝）
 - 一个大的 CLI 框，框内列出 11 个子命令：init / setup / start / stop / run / status / eject / migrate / vision / spec / proof。
 - 框上标注："控制面 —— 安装、配置、调度、质检，不直接写业务代码"。
 - 与第 3 层引擎的关系用虚线调用箭头（run / run --self / proof 等）。
@@ -39,15 +39,15 @@ SymEvo 是什么？外环（进化用户项目）、内环（进化自己）、�
 ## 两条进化环
 
 ### 外环（橙色、细实线、顺时针）——"进化任意目标项目"
-节点链：code-evolve CLI → 用户目标项目（`.evolve/` 框架目录：IDENTITY / vision / spec / scripts / skills / state）→ 项目源码与构建门（栈检测）→ git 提交 / PR → 回到 CLI（下个 session）。
+节点链：symevo CLI → 用户目标项目（`.evolve/` 框架目录：IDENTITY / vision / spec / scripts / skills / state）→ 项目源码与构建门（栈检测）→ git 提交 / PR → 回到 CLI（下个 session）。
 环上标注："项目持续进化 —— 现状能力，完全保留"。可加 📦 图标表示用户项目。
 
 ### 内环（绿色、粗实线、顺时针）——"框架进化自己"
-节点链：CLI `--self` → code-evolve 自身仓库（src/ + templates/ + docs/ + skills/）→ 质量门（npm build / npm test / npm lint + proof --full）→ 提交成功，或 失败自动回滚 + 捕获 REQ → 回到 CLI（下个 session）。
+节点链：CLI `--self` → symevo 自身仓库（src/ + templates/ + docs/ + skills/）→ 质量门（npm build / npm test / npm lint + proof --full）→ 提交成功，或 失败自动回滚 + 捕获 REQ → 回到 CLI（下个 session）。
 环上标注："框架自己优化自己 —— SymEvo 新增"。在"质量门"节点旁用红色标注回滚分支。
 
 ## 传播闭环（紫色、粗虚线、带方向箭头）
-节点链：内环改进 → 写入 templates/ 模板 → npm publish（人工）→ npm registry → 用户 npx code-evolve init 获取进化后的新引擎 → 用户项目变好 → 项目沉淀的 learnings 反哺引擎（供内环 A1 评估参考）→ 闭环。
+节点链：内环改进 → 写入 templates/ 模板 → npm publish（人工）→ npm registry → 用户 npx symevo init 获取进化后的新引擎 → 用户项目变好 → 项目沉淀的 learnings 反哺引擎（供内环 A1 评估参考）→ 闭环。
 环上标注："正反馈 —— 框架强 → 项目好"。
 
 ## 视觉要求
@@ -119,7 +119,7 @@ SymEvo 是什么？外环（进化用户项目）、内环（进化自己）、�
 
 | 图 | 内容与用途 | 何时用 |
 |---|---|---|
-| **模块组件图** | code-evolve 仓库结构：src/ CLI 11 命令 + utils ↔ templates/（scripts/skills/state/workflows）；绿色虚线高亮 SymEvo 新增文件（evolve_common.sh、evolve-self.sh、extract_trajectory.py、memory_synth.py、skill_evolve.sh、SELF_IDENTITY.md、ROADMAP.md、memory/、session_plan/、3 个新 workflow） | CONTRIBUTING / 开发指南，帮协作者认路 |
+| **模块组件图** | symevo 仓库结构：src/ CLI 11 命令 + utils ↔ templates/（scripts/skills/state/workflows）；绿色虚线高亮 SymEvo 新增文件（evolve_common.sh、evolve-self.sh、extract_trajectory.py、memory_synth.py、skill_evolve.sh、SELF_IDENTITY.md、ROADMAP.md、memory/、session_plan/、3 个新 workflow） | CONTRIBUTING / 开发指南，帮协作者认路 |
 | **会话生命周期状态图** | 现状（单 prompt PHASE 1–7 一次调用）vs 目标（A1→A2→B→B-eval 多阶段）的状态机对比，失败回滚分支标红 | 方案文档 §2/§3 对照，解释"改了什么" |
 | **记忆系统图** | 会话反思 → learnings.jsonl（append-only 真源）→ memory_synth.py 时间加权压缩 → active_learnings.md → 注入下个会话 prompt，形成闭环；含 LEARNINGS.md 迁移箭头 | 记忆设计章节 |
 | **技能自进化图** | skill_evolve 三重门（计数器≥5 / 24h 冷却 / build-test 通过）→ git worktree 隔离 → agent refine/create/retire SKILL.md → 验证 → 提交或回滚 | 技能设计章节 |

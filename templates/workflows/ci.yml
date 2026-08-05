@@ -1,4 +1,4 @@
-# code-evolve:managed — installed by `code-evolve init --with-ci`, removed by `code-evolve eject`. Safe to delete.
+# symevo:managed — installed by `symevo init --with-ci`, removed by `symevo eject`. Safe to delete.
 name: CI
 
 on:

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Test: `code-evolve init --agent <X> --with-ci` templates the bundled GitHub
+# Test: `symevo init --agent <X> --with-ci` templates the bundled GitHub
 # Actions workflow (evolve.yml) for the configured backend — installing the right
 # CLI, wiring the right secret, and setting AGENT/MODEL so evolve.sh sources the
 # matching adapter (not always Claude).

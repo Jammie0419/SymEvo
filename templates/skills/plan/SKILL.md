@@ -7,7 +7,7 @@ tools: [bash, read_file, write_file, list_files]
 # Planning
 
 You are planning a project based on .evolve/vision.md and .evolve/spec.md. This may be a
-greenfield build from scratch, or an existing repo that code-evolve was dropped into — check
+greenfield build from scratch, or an existing repo that symevo was dropped into — check
 which before you plan (see "Respect existing conventions" below).
 
 ## When to use this skill

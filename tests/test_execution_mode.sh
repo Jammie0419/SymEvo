@@ -1,6 +1,6 @@
 #!/bin/bash
-# Test: `code-evolve init --mode <local|ci|both>` persists the execution mode to
-# config.json and `code-evolve status` reports it. Also checks --mode drives the
+# Test: `symevo init --mode <local|ci|both>` persists the execution mode to
+# config.json and `symevo status` reports it. Also checks --mode drives the
 # right artifacts (CI workflows for ci/both) and rejects an invalid mode.
 # Regression test for issue #24 (P1.5).
 #

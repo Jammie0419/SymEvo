@@ -1,15 +1,15 @@
-# SymEvo 方案 —— 让 code-evolve 学会自我进化（同时继续进化项目）
+# SymEvo 方案 —— 让 symevo 学会自我进化（同时继续进化项目）
 
 > 状态：方案草案（方法名 SymEvo 暂定）
-> 目标仓库：`code-evolve`（本仓库，TypeScript + bash 模板的 npm CLI，当前 v0.2.0）
+> 目标仓库：`symevo`（本仓库，TypeScript + bash 模板的 npm CLI，当前 v0.2.0）
 > 参考来源：`yologdev/yoyo-evolve`（Rust 自进化 agent，MIT，~115k 行源码 + 2118 行 `scripts/evolve.sh`）
-> 一句话：**SymEvo = 双循环共生进化** —— 内环让 code-evolve 在自身仓库上像 yoyo 一样自主优化自己；外环保留"进化任意目标项目"的既有能力；两环共享同一套引擎（会话编排、验证门、记忆、技能、PROOF9 质量门），内环对引擎的改进自动通过 `templates/` 传播到所有外环用户。
+> 一句话：**SymEvo = 双循环共生进化** —— 内环让 symevo 在自身仓库上像 yoyo 一样自主优化自己；外环保留"进化任意目标项目"的既有能力；两环共享同一套引擎（会话编排、验证门、记忆、技能、PROOF9 质量门），内环对引擎的改进自动通过 `templates/` 传播到所有外环用户。
 
 ---
 
 ## 1. 现状与目标
 
-| 维度 | yoyo-evolve（参考对象） | code-evolve（现状） | SymEvo（目标） |
+| 维度 | yoyo-evolve（参考对象） | symevo（现状） | SymEvo（目标） |
 |---|---|---|---|
 | 语言/技术栈 | Rust agent（yoagent） | TypeScript CLI + bash/python 模板 | **统一 TypeScript/Node（保留）** |
 | 进化对象 | **只有自己**（自己的 src/） | **只有目标项目**（用户仓库的 .evolve/） | **自己 + 目标项目**（双环） |
@@ -20,18 +20,18 @@
 | 失败处置 | 回滚 + journal + REQ/学习反思 | 回滚 + journal + REQ 自动捕获 | 保留并强化（加反思步骤） |
 | 议题闭环 | 净票 + 已解决反馈 + LLM 承诺扫描 | 净票 + 三类标签 + 回复 | 补"已解决反馈"闭环 |
 
-**目标（What）**：把 yoyo 的七类自进化机制移植进 code-evolve 框架，使：
-1. code-evolve 自身仓库（本仓库）进入自我进化循环 —— agent 自主评估自身源码、规划、实现、过门（`npm run build` / `npm test` / `npm run lint` / `proof run --full`）、失败回滚、记账；
+**目标（What）**：把 yoyo 的七类自进化机制移植进 symevo 框架，使：
+1. symevo 自身仓库（本仓库）进入自我进化循环 —— agent 自主评估自身源码、规划、实现、过门（`npm run build` / `npm test` / `npm run lint` / `proof run --full`）、失败回滚、记账；
 2. 既有"进化任意目标项目"功能完全保留、且因引擎本身被进化而**间接受益**（内环改的是 `templates/` 里的引擎，用户每次 `init` 拿到的是进化后的版本）；
 3. 最终形成闭环：**框架进化自己 → 框架变强 → 框架进化的项目变好 → 项目里沉淀的 learnings 反哺框架**。
 
-**非目标（Not What）**：不把 yoyo 的 Rust agent REPL 搬进来；不重写 code-evolve 为 Rust；不做 yoyo 的社交会话（social.sh）/赞助体系/多 provider 客户端。
+**非目标（Not What）**：不把 yoyo 的 Rust agent REPL 搬进来；不重写 symevo 为 Rust；不做 yoyo 的社交会话（social.sh）/赞助体系/多 provider 客户端。
 
 ---
 
-## 2. 当前 code-evolve 进化方法拆解（现状基线，要保留什么）
+## 2. 当前 symevo 进化方法拆解（现状基线，要保留什么）
 
-> 本节拆解 **code-evolve 现有的"进化一个目标项目"方法**，即 `templates/scripts/evolve.sh` 为核心、CLI（`src/`）为控制面的完整机制。它本身源自 yoyo-evolve 早期版本的 evolve.sh（注释写明 "Adapted from yoyo-evolve's evolve.sh"），是 yoyo 方法的**简化快照**——同一条进化谱系，但缺了 yoyo 后来加的多阶段编排、轨迹、记忆合成等机制（缺口清单见 §2.11，与 §3 的 yoyo 拆解对照）。
+> 本节拆解 **symevo 现有的"进化一个目标项目"方法**，即 `templates/scripts/evolve.sh` 为核心、CLI（`src/`）为控制面的完整机制。它本身源自 yoyo-evolve 早期版本的 evolve.sh（注释写明 "Adapted from yoyo-evolve's evolve.sh"），是 yoyo 方法的**简化快照**——同一条进化谱系，但缺了 yoyo 后来加的多阶段编排、轨迹、记忆合成等机制（缺口清单见 §2.11，与 §3 的 yoyo 拆解对照）。
 
 ### 2.1 文档驱动：vision + spec 是唯一事实源
 - `.evolve/vision.md` 定义"为什么/是什么"（北极星），`.evolve/spec.md` 定义技术栈、架构与**按优先级排列的 feature 复选框列表**（`- [ ]` 未开始 / `- [~]` 进行中 / `- [x]` 完成）——复选框是构建管线的 backlog 真源。
@@ -63,8 +63,8 @@
 ### 2.5 PROOF9 质量门（REQ 台账 + gate 证据，CLI + 会话内双轨）
 - `REQUIREMENTS.md` 是 **Markdown 台账**：`## REQ-XXXX: title` + 字段（Source / Severity / Scope / Obligations / Evidence / Status，可选 Satisfied by / Waiver reason / Waiver expires）。解析与序列化在 `src/utils/proof.ts`。
 - **会话内（Phase 4.5）**：scope 交集匹配（glob 模式 + `GET /path` 路由模式 → 路径组件比对）、逐 gate 跑验证、证据写入 `.evolve/evidence/REQ-XXXX/dayN-commit-gate-时间戳.txt`（截断 500 行）、全部通过 → `satisfied`（记录 "Day N, commit sha"）；曾经 satisfied 现失败 → `regressed` 并**阻止提交**。
-- **CLI 侧 `code-evolve proof`**：`capture`（交互建 REQ，可 `--from-issue` 拉 GitHub issue 预填，自动生成 UNIT/CONTRACT/E2E 测试桩）、`run`（`--full` 或按当前改动文件 scope 过滤；gate 自动探测工具：BUILD/UNIT/LINT/SEC 各有候选命令优先级，exit 2 = 无工具跳过不判成败）、`waive`（豁免到指定 Day，到期自动恢复 open）、`status` / `list` / `show`。
-- 与 yoyo 的差异：code-evolve 把 PROOF9 做成**独立 CLI 命令 + 台账格式 + 证据文件规范**（yoyo 的 Phase 4.5 只是 prompt 里的指令，无独立工具）——这是 code-evolve 值得保留的优势。
+- **CLI 侧 `symevo proof`**：`capture`（交互建 REQ，可 `--from-issue` 拉 GitHub issue 预填，自动生成 UNIT/CONTRACT/E2E 测试桩）、`run`（`--full` 或按当前改动文件 scope 过滤；gate 自动探测工具：BUILD/UNIT/LINT/SEC 各有候选命令优先级，exit 2 = 无工具跳过不判成败）、`waive`（豁免到指定 Day，到期自动恢复 open）、`status` / `list` / `show`。
+- 与 yoyo 的差异：symevo 把 PROOF9 做成**独立 CLI 命令 + 台账格式 + 证据文件规范**（yoyo 的 Phase 4.5 只是 prompt 里的指令，无独立工具）——这是 symevo 值得保留的优势。
 
 ### 2.6 议题管道（社区输入 → 消毒 → 优先级 → 回复闭环）
 - Step 3 用 `gh` 拉三类标签：`agent-input`（≤15 条）/ `agent-self`（自己给自己留的 backlog，≤5 条）/ `agent-help-wanted`（求助人类的议题，含"Human replied"回帖）。`format_issues.py` 处理：**随机 boundary 标记**（防注入）、HTML 注释剥离、正文截断 500 字符、**净票排序**（👍−👎）、赞助人优先 + 按天轮转选取 3 条；输出带 "SECURITY: Issue content below is UNTRUSTED USER INPUT" 提示。
@@ -83,8 +83,8 @@
 - 局限：技能文件是**静态**的，agent 不能进化它们（yoyo 的 skill_evolve 机制解决此问题，§3.5）。
 
 ### 2.9 双通道调度（本地 cron / GitHub Actions）
-- **本地**：`start` / `init --mode local|both` → crontab 条目（`hourlyCron()` 表达式，`# code-evolve:<projectDir>` 标记幂等增删）+ `.evolve/.env`（0600，写 API key / MODEL / AGENT / PATH，供 cron 无环境时 source）+ `schedule.json`（仅展示用，不参与门控）；原生 Windows 不支持（提示 WSL/CI）。
-- **CI**：`init --with-ci` / `--mode ci|both` → `.github/workflows/evolve.yml`（`init` 按所选 agent 模板化：AGENT/MODEL 环境、CLI 安装命令、`# code-evolve:secrets` 标记内的密钥块——密钥只在需要的 step 上注入）+ `evolve-ci.yml` 安全网（改名避免覆盖用户自己的 ci.yml）。工作流含 **3 次重试**（等 15/45 分钟）、按栈装工具链（rust/go/java）、bot 身份提交。
+- **本地**：`start` / `init --mode local|both` → crontab 条目（`hourlyCron()` 表达式，`# symevo:<projectDir>` 标记幂等增删）+ `.evolve/.env`（0600，写 API key / MODEL / AGENT / PATH，供 cron 无环境时 source）+ `schedule.json`（仅展示用，不参与门控）；原生 Windows 不支持（提示 WSL/CI）。
+- **CI**：`init --with-ci` / `--mode ci|both` → `.github/workflows/evolve.yml`（`init` 按所选 agent 模板化：AGENT/MODEL 环境、CLI 安装命令、`# symevo:secrets` 标记内的密钥块——密钥只在需要的 step 上注入）+ `evolve-ci.yml` 安全网（改名避免覆盖用户自己的 ci.yml）。工作流含 **3 次重试**（等 15/45 分钟）、按栈装工具链（rust/go/java）、bot 身份提交。
 - **agent 适配器**：`scripts/agents/{claude,codex,opencode,ollama}.sh` 统一 `run_agent <prompt_file> <model> <timeout_cmd> <timeout>` 接口 + `agent_detect_error`（claude 的流式 JSON error 标记）+ `check_agent`；`timeout`/`gtimeout` 杀进程树，spawnSync 超时兜底。
 
 ### 2.10 运维与安全细节
@@ -92,7 +92,7 @@
 
 ### 2.11 小结：现状基线清单（已有能力 vs yoyo 缺口）
 
-| 类别 | code-evolve 已有（保留） | yoyo 有而 code-evolve 缺（§3 逐条拆解，§6 落地） |
+| 类别 | symevo 已有（保留） | yoyo 有而 symevo 缺（§3 逐条拆解，§6 落地） |
 |---|---|---|
 | 编排 | 单 prompt 多 PHASE | **多阶段 A1/A2/B/B-eval + session_plan 任务文件** |
 | 验证 | 栈检测 + 3 轮修复 + 回滚 + REQ 捕获 | 同左（保留）＋ 评估器 agent 审阅 |
@@ -107,11 +107,11 @@
 
 ## 3. yoyo-evolve 自进化方法拆解（要移植什么）
 
-以下机制按"从 yoyo 源码中提取的规律 → 在 code-evolve 中的落点"组织。yoyo 源码已抓取核对（`scripts/evolve.sh` 2118 行、`scripts/skill_evolve.sh`、`scripts/extract_trajectory.py`、`scripts/format_issues.py`、`.github/workflows/evolve.yml`、`IDENTITY.md`）。
+以下机制按"从 yoyo 源码中提取的规律 → 在 symevo 中的落点"组织。yoyo 源码已抓取核对（`scripts/evolve.sh` 2118 行、`scripts/skill_evolve.sh`、`scripts/extract_trajectory.py`、`scripts/format_issues.py`、`.github/workflows/evolve.yml`、`IDENTITY.md`）。
 
 ### 3.1 宪法（IDENTITY.md）：自我即目标
 - yoyo 规则（IDENTITY.md）：只能改自己的源码；**每次改动必须过 build+test，坏了就回滚并在 journal 里记录失败**；每 session 必须写 journal；**先写测试再写功能**；社区 issue 比自己的猜测更有价值；可以用互联网学习。
-- 落点：code-evolve 已有 IDENTITY.md（面向目标项目），新增 **self 模式专属宪法**（`SELF_IDENTITY.md`，见 §6.3），把"你是这个框架本身，你要让框架变强"写进去。
+- 落点：symevo 已有 IDENTITY.md（面向目标项目），新增 **self 模式专属宪法**（`SELF_IDENTITY.md`，见 §6.3），把"你是这个框架本身，你要让框架变强"写进去。
 
 ### 3.2 多阶段编排（A1 评估 → A2 规划 → B 实现 → B-eval 评估器修复）
 - yoyo 关键做法：**一个 session 拆成多次独立 agent 调用**，各自有 time budget：
@@ -120,7 +120,7 @@
   - **B Implementation**：按 task 文件逐个实现、测试、小步提交。
   - **B-eval Evaluator agent**：机械检查（build/test）通过后，由一个评估 agent 审阅改动，带修复循环。
 - 好处：评估与规划分离 → 规划质量高；每次调用 prompt 短、上下文干净；失败可定位到阶段。
-- code-evolve 现状：单 prompt（§2.2）→ 升级为多阶段，**外环同样受益**。
+- symevo 现状：单 prompt（§2.2）→ 升级为多阶段，**外环同样受益**。
 
 ### 3.3 轨迹感知（Trajectory Awareness）
 - `extract_trajectory.py`（61KB）合成三块注入 A1/A2 prompt（3KB 上限 ≈750 token）：
@@ -132,15 +132,15 @@
 ### 3.4 记忆：追加存档 + 时间加权合成
 - 原始记忆：`memory/learnings.jsonl`（append-only，永不压缩，真源）；
 - 合成记忆：每日任务把 JSONL 读入，**时间加权压缩**（近期=全文，久远=主题摘要），写入 `memory/active_learnings.md`，加载进每个 prompt。
-- code-evolve 现状：`LEARNINGS.md` 单文件（agent 自己维护，§2.7）→ 升级为双文件制（§6.2/6.3）。
+- symevo 现状：`LEARNINGS.md` 单文件（agent 自己维护，§2.7）→ 升级为双文件制（§6.2/6.3）。
 
 ### 3.5 技能自进化（skill_evolve.sh）
 - 独立 cron 工作流，**三重门**才跑：session 计数器 ≥5（`.skill_evolve_counter`）+ 24h 冷却（`.skill_evolve_last_run`）+ 当前 main 通过 build/test；
 - 用 **git worktree** 隔离，避免与主进化 session 冲突；agent 对自己的 SKILL.md 做 refine/create/retire；改动自动提交，build 坏了自动回滚；完成或跳过都重置计数器（冷却控频率、不控结果）；`SKILL_EVOLVE_DRY_RUN=true` 可只出 prompt 不花钱。
 
 ### 3.6 议题闭环
-- 三类标签 agent-input / agent-self / agent-help-wanted（code-evolve 已有，§2.6）；
-- 净票评分 + 轮转选取 + 边界消毒（code-evolve 已有，直接来自 yoyo 移植）；
+- 三类标签 agent-input / agent-self / agent-help-wanted（symevo 已有，§2.6）；
+- 净票评分 + 轮转选取 + 边界消毒（symevo 已有，直接来自 yoyo 移植）；
 - **补缺口**：已解决 issue 的反馈回路（关闭后把"Human's comment"带回下个 session）、pending replies 检测、**LLM 判断的承诺扫描**（扫自己 issue/discussion 里答应过但没做的事）。
 
 ### 3.7 运维与验证纪律
@@ -149,11 +149,11 @@
 
 ---
 
-## 4. 技术栈决策：统一选 TypeScript/Node（code-evolve 为基底）
+## 4. 技术栈决策：统一选 TypeScript/Node（symevo 为基底）
 
-用户要求"两个源码使用源码不一致，考虑修改融合的便利性，选定一个一致的"。**结论：以 code-evolve 的 TypeScript + bash 模板为唯一基底，yoyo 的方法以"移植方法论"方式融入，不引入任何 Rust 代码。**
+用户要求"两个源码使用源码不一致，考虑修改融合的便利性，选定一个一致的"。**结论：以 symevo 的 TypeScript + bash 模板为唯一基底，yoyo 的方法以"移植方法论"方式融入，不引入任何 Rust 代码。**
 
-| 对比项 | 选 code-evolve（TS/Node） | 选 yoyo（Rust） |
+| 对比项 | 选 symevo（TS/Node） | 选 yoyo（Rust） |
 |---|---|---|
 | 进化引擎本质 | bash 编排脚本 + 外部 agent CLI（claude/codex/…），语言无关 | 同左（yoyo 的 evolve.sh 也是 bash） |
 | 需迁移的 Rust 面 | 无（yoyo 的 Rust 是它的 agent REPL，我们不需要） | 需重写整个 CLI + 模板 → 全部推倒 |
@@ -161,7 +161,7 @@
 | 融合成本 | 低：只移植"方法"（脚本/prompt 逻辑），接口 `run_agent` 天然一致 | 高：npm 包生态、ts-jest CI、发布管线全丢 |
 | 与外部 agent 的适配 | 已有 4 个适配器（claude/codex/opencode/ollama） | 只有自带的 Rust agent |
 
-关键洞察：**两家的进化引擎本来就是同源**（code-evolve 的 evolve.sh 注释写明 "Adapted from yoyo-evolve's evolve.sh"），所以"融合"本质是把 yoyo 后来加的机制（多阶段、轨迹、记忆合成、技能进化）以同样语言移植回共享祖先进化出的分支，不存在跨语言改写问题。
+关键洞察：**两家的进化引擎本来就是同源**（symevo 的 evolve.sh 注释写明 "Adapted from yoyo-evolve's evolve.sh"），所以"融合"本质是把 yoyo 后来加的机制（多阶段、轨迹、记忆合成、技能进化）以同样语言移植回共享祖先进化出的分支，不存在跨语言改写问题。
 
 ---
 
@@ -169,14 +169,14 @@
 
 ```
                     ┌─────────────────────────────────────────────┐
-                    │            code-evolve 引擎（共享层）          │
+                    │            symevo 引擎（共享层）          │
                     │  evolve_common.sh：阶段函数 / run_agent / 门  │
                     │  PROOF9 质量门 · 议题管道 · 记忆 · 技能        │
                     └──────┬──────────────────────────┬──────────┘
                            │                          │
               ┌────────────▼───────────┐  ┌───────────▼────────────┐
               │  内环：自我进化（Sym）    │  │  外环：项目进化（Evo）    │
-              │  code-evolve 仓库本身     │  │  任意目标项目            │
+              │  symevo 仓库本身     │  │  任意目标项目            │
               │  evolve-self.sh         │  │  既有 evolve.sh（升级后） │
               │  目标 = src/ templates/  │  │  目标 = 用户项目源码      │
               │  门 = npm build/test +   │  │  门 = 栈检测 build/test  │
@@ -189,9 +189,9 @@
                                  闭环：框架强 → 项目好
 ```
 
-- **内环（Sym）**：在 code-evolve 仓库的 `.github/workflows/evolve-self.yml` 定时（如每 8h）触发 `evolve-self.sh`，A1 评估自身 → A2 规划 → B 实现 → B-eval，门 = `npm run build` + `npm test` + `npm run lint` + `code-evolve proof run --full`（对自身的 REQUIREMENTS.md），失败回滚并写 journal + 自动捕获 REQ；session 结果推送到审计分支。
-- **外环（Evo）**：现有 `code-evolve init/run/start/…` 全保留（§2 拆解的能力即基线）；`evolve.sh` 升级为多阶段（可选，默认先保持兼容，内环验证后再放开）。
-- **模式选择**：`.evolve/config.json` 增加 `self: true|false`（或子命令 `run --self`）。内环模式只在 code-evolve 自身仓库启用；外环模式行为不变。
+- **内环（Sym）**：在 symevo 仓库的 `.github/workflows/evolve-self.yml` 定时（如每 8h）触发 `evolve-self.sh`，A1 评估自身 → A2 规划 → B 实现 → B-eval，门 = `npm run build` + `npm test` + `npm run lint` + `symevo proof run --full`（对自身的 REQUIREMENTS.md），失败回滚并写 journal + 自动捕获 REQ；session 结果推送到审计分支。
+- **外环（Evo）**：现有 `symevo init/run/start/…` 全保留（§2 拆解的能力即基线）；`evolve.sh` 升级为多阶段（可选，默认先保持兼容，内环验证后再放开）。
+- **模式选择**：`.evolve/config.json` 增加 `self: true|false`（或子命令 `run --self`）。内环模式只在 symevo 自身仓库启用；外环模式行为不变。
 
 ---
 
@@ -205,8 +205,8 @@
 | `src/commands/run.ts` | 新增 `--self` 路由到 `evolve-self.sh`；环境变量 `EVOLVE_TARGET=self|project`、`PHASE_TIMEOUTS`。 |
 | `src/commands/status.ts` | 展示内环状态（self session 计数、最近 outcome、轨迹摘要、技能计数器）。 |
 | `src/commands/proof.ts` | 增加 `--self` 预设门（build/test/lint 全量，不依赖栈检测，因为目标就是本仓库）；REQ scope 缺省 `src/**,templates/**,*.json`。 |
-| `src/commands/skill-evolve.ts`（新） | `code-evolve skill-evolve`：包装 skill_evolve.sh（门检查、dry-run、force）。 |
-| `src/commands/memory-synthesize.ts`（新） | `code-evolve memory-synthesize`：触发 learnings.jsonl → active_learnings.md 合成。 |
+| `src/commands/skill-evolve.ts`（新） | `symevo skill-evolve`：包装 skill_evolve.sh（门检查、dry-run、force）。 |
+| `src/commands/memory-synthesize.ts`（新） | `symevo memory-synthesize`：触发 learnings.jsonl → active_learnings.md 合成。 |
 | `src/utils/config.ts` | `EvolveConfig` 增加 `self?: boolean`、`selfEveryHours?`；CI 模板函数支持 self 工作流。 |
 | `src/utils/trajectory.ts`（新） | 轨迹块的 TS 侧工具（读取审计分支 outcome.json，供 status 展示）；主体逻辑在 python 脚本。 |
 
@@ -228,7 +228,7 @@
 |---|---|
 | `IDENTITY.md` | 保持（外环宪法，§2.1）；self 模式提示链接到 SELF_IDENTITY.md。 |
 | `SELF_IDENTITY.md`（新） | 内环宪法：只能改 src/、templates/、docs/、skills/、workflows/；每次改动必须过 `npm run build` + `npm test` + `npm run lint` + `proof run --full`；坏了回滚并 journal；先写测试再写功能；禁止触碰 package.json 版本号与 dist/（发布管线保留给人）；社区 issue 优先。 |
-| `ROADMAP.md`（新） | 内环的"spec"：以 checkbox 列表定义 code-evolve 自身的功能路线（如"多阶段编排""轨迹感知""技能进化"…），status 解析复用现有 spec.md 复选框逻辑（§2.1）。 |
+| `ROADMAP.md`（新） | 内环的"spec"：以 checkbox 列表定义 symevo 自身的功能路线（如"多阶段编排""轨迹感知""技能进化"…），status 解析复用现有 spec.md 复选框逻辑（§2.1）。 |
 | `memory/learnings.jsonl`（新） | append-only 学习存档（真源，永不压缩）。 |
 | `memory/active_learnings.md`（新） | 每日合成，注入每个 session prompt。 |
 | `session_plan/`（新，需入库） | A1 输出 assessment.md、A2 输出 tasks、session 末 outcome.json。 |
@@ -259,7 +259,7 @@
 
 1. **保护文件扩展**（内环 agent 不可改）：`package.json`（版本/依赖）、`dist/`、`package-lock.json`、`.github/workflows/` 自身；外环 agent 仍不可改 `.evolve/IDENTITY.md`、`evolve.sh`、`format_issues.py` 等（现有清单保留，§2.10）。
 2. **双保险门**：内环改动先过机械门（npm build/test/lint + proof --full），再过 B-eval 评估器；任一失败 → 回滚到 `SESSION_START_SHA` + journal 记录 + 自动捕获 REQ（复用现有回滚与 REQ 捕获代码，§2.4）。
-3. **模式隔离**：`self` 与 `project` 模式由 config 显式区分，`run --self` 绝不落到外环逻辑，反之亦然；防止"目标项目是 code-evolve 副本"时行为混淆。
+3. **模式隔离**：`self` 与 `project` 模式由 config 显式区分，`run --self` 绝不落到外环逻辑，反之亦然；防止"目标项目是 symevo 副本"时行为混淆。
 4. **人保留最后一道闸**：内环自动提交到**独立分支或 PR**（而非直推 main）为可选项（yoyo 直推 main + 回滚）；建议初期直推 main 复刻 yoyo 以完整闭环，同时 `docs/` 每周人工 review 一次。
 5. **审计分支**：`audit-log` 分支只追加 outcome.json（每 session 一个），不参与 main 构建，防轨迹数据污染主分支历史。
 
@@ -269,7 +269,7 @@
 
 | 阶段 | 内容 | 验收标准 |
 |---|---|---|
-| **M0 基线** | 现状 code-evolve 0.2.0（§2 拆解的能力即基线）；本仓库已有 CI（jest + tsc） | `npm test` / `npm run build` 绿 |
+| **M0 基线** | 现状 symevo 0.2.0（§2 拆解的能力即基线）；本仓库已有 CI（jest + tsc） | `npm test` / `npm run build` 绿 |
 | **M1 内环 MVP** | `evolve_common.sh` 抽取 + `evolve-self.sh` + 多阶段 A1/A2/B + `SELF_IDENTITY.md`/`ROADMAP.md` + `proof --self` 预设 + `evolve-self.yml` 上线 | 本仓库出现第一笔"内环改动提交"；坏改动被回滚并有 REQ 记录；`npm test` 全绿 |
 | **M2 记忆与轨迹** | `memory/` 双文件制 + `memory_synth.py` + `extract_trajectory.py` + 审计分支 + 子系统集中度门 | 连续 3 个 session 的 A1 评估显著引用轨迹与 active_learnings；学习跨 session 累积可验证 |
 | **M3 技能自进化** | `skill_evolve.sh` + `skill-evolve` 技能 + `skill-evolve.yml` | 计数器与冷却门正确；出现至少一次自主新增/重写 SKILL.md 并被保留 |
@@ -304,7 +304,7 @@
 - [ ] 4. `SELF_IDENTITY.md` + `ROADMAP.md` + `memory/` + `session_plan/` 状态文件
 - [ ] 5. `proof` 的 `--self` 预设门
 - [ ] 6. `evolve-self.yml` 工作流（bot token + 重试 + 排队）
-- [ ] 7. 本仓库 `code-evolve init --self` 自举，跑通第一轮内环
+- [ ] 7. 本仓库 `symevo init --self` 自举，跑通第一轮内环
 - [ ] 8. `extract_trajectory.py` + 审计分支 + outcome.json 规范
 - [ ] 9. `memory_synth.py` + 每日合成工作流
 - [ ] 10. `skill_evolve.sh` + 技能计数门 + `skill-evolve` 命令
@@ -314,9 +314,9 @@
 
 ---
 
-## 附录 A：yoyo → code-evolve 移植对照表
+## 附录 A：yoyo → symevo 移植对照表
 
-| yoyo 源码 | 移植目标（code-evolve） | 移植方式 |
+| yoyo 源码 | 移植目标（symevo） | 移植方式 |
 |---|---|---|
 | `scripts/evolve.sh`（A1/A2/B/B-eval） | `evolve_common.sh` + `evolve-self.sh` + `evolve.sh` | 逻辑重写为共享祖先进化分支（同源 bash） |
 | `scripts/extract_trajectory.py` | `templates/scripts/extract_trajectory.py` | 几乎直移（python3 已是依赖） |
@@ -330,4 +330,4 @@
 
 ---
 
-*SymEvo 本质：把"yoyo 只进化自己"与"code-evolve 只进化项目"两个单环，耦合成一个共享引擎的双环 —— 引擎在进化自己时产生的每一次改进，都通过 `templates/` 自动惠及所有被进化项目，形成可自我加速的正反馈。*
+*SymEvo 本质：把"yoyo 只进化自己"与"symevo 只进化项目"两个单环，耦合成一个共享引擎的双环 —— 引擎在进化自己时产生的每一次改进，都通过 `templates/` 自动惠及所有被进化项目，形成可自我加速的正反馈。*

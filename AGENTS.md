@@ -4,14 +4,14 @@ Canonical, agent-agnostic guide for any AI coding agent (Claude Code, Codex,
 OpenCode, Cursor, etc.) working **on this repository**. `CLAUDE.md` imports this
 file — keep project guidance here, not duplicated there.
 
-> This is guidance for developing the **code-evolve package itself**. It is not
-> the runtime that code-evolve installs into a user's project (that lives in
+> This is guidance for developing the **symevo package itself**. It is not
+> the runtime that symevo installs into a user's project (that lives in
 > `templates/` and `.evolve/`).
 
 ## What This Is
 
-An npm CLI package (`code-evolve`) that turns any project into a self-evolving
-codebase. Users run `npx code-evolve init` in their project, fill in
+An npm CLI package (`symevo`) that turns any project into a self-evolving
+codebase. Users run `npx symevo init` in their project, fill in
 `.evolve/vision.md` and `.evolve/spec.md`, and the framework autonomously builds
 and improves the project session after session using an AI coding agent
 (Claude Code by default; Codex, OpenCode, and Ollama are also supported).
@@ -19,24 +19,24 @@ and improves the project session after session using an AI coding agent
 ## Repository Structure
 
 ```
-code-evolve/                  # npm package source
-├── package.json              # npm package config (bin: code-evolve, ce)
+symevo/                  # npm package source
+├── package.json              # npm package config (bin: symevo, se)
 ├── tsconfig.json             # TypeScript config
 ├── jest.config.js            # Jest (ts-jest) config
 ├── src/                      # CLI source (TypeScript)
 │   ├── cli.ts                # Entrypoint (commander)
 │   ├── commands/             # One file per subcommand (see Commands below)
-│   │   ├── init.ts           # code-evolve init (exports runInit)
-│   │   ├── setup.ts          # code-evolve setup (guided onboarding wizard)
-│   │   ├── start.ts          # code-evolve start (set up recurring cron)
-│   │   ├── stop.ts           # code-evolve stop (remove cron)
-│   │   ├── run.ts            # code-evolve run
-│   │   ├── status.ts         # code-evolve status
-│   │   ├── eject.ts          # code-evolve eject
-│   │   ├── migrate.ts        # code-evolve migrate
-│   │   ├── vision.ts         # code-evolve vision (guided interview)
-│   │   ├── spec.ts           # code-evolve spec (guided interview)
-│   │   └── proof.ts          # code-evolve proof (PROOF9 quality gates)
+│   │   ├── init.ts           # symevo init (exports runInit)
+│   │   ├── setup.ts          # symevo setup (guided onboarding wizard)
+│   │   ├── start.ts          # symevo start (set up recurring cron)
+│   │   ├── stop.ts           # symevo stop (remove cron)
+│   │   ├── run.ts            # symevo run
+│   │   ├── status.ts         # symevo status
+│   │   ├── eject.ts          # symevo eject
+│   │   ├── migrate.ts        # symevo migrate
+│   │   ├── vision.ts         # symevo vision (guided interview)
+│   │   ├── spec.ts           # symevo spec (guided interview)
+│   │   └── proof.ts          # symevo proof (PROOF9 quality gates)
 │   └── utils/
 │       ├── paths.ts          # Path resolution
 │       ├── checks.ts         # Dependency checking
@@ -59,7 +59,7 @@ code-evolve/                  # npm package source
 
 ## Commands
 
-The CLI ships 11 subcommands (registered in `src/cli.ts`; also available as `ce`):
+The CLI ships 11 subcommands (registered in `src/cli.ts`; also available as `se`):
 
 | Command | Purpose |
 |---------|---------|
@@ -69,8 +69,8 @@ The CLI ships 11 subcommands (registered in `src/cli.ts`; also available as `ce`
 | `stop` | Stop the evolution engine (removes the local cron job) |
 | `run` | Run one evolution cycle |
 | `status` | Show current evolution state |
-| `eject` | Remove code-evolve framework, keep project files |
-| `migrate` | Convert an existing spec or vision document into code-evolve format |
+| `eject` | Remove symevo framework, keep project files |
+| `migrate` | Convert an existing spec or vision document into symevo format |
 | `vision` | Guided interview to generate `.evolve/vision.md` |
 | `spec` | Guided interview to generate `.evolve/spec.md` |
 | `proof` | PROOF9 quality gates and requirements management |
@@ -89,11 +89,11 @@ Installation and publishing are documented in [INSTALL.md](INSTALL.md).
 
 ## How It Works (User Perspective)
 
-1. User runs `code-evolve init` in their project
+1. User runs `symevo init` in their project
 2. Creates `.evolve/` with scripts, skills, state files
 3. Creates `vision.md` and `spec.md` templates in `.evolve/`
 4. User fills in vision and spec
-5. `code-evolve run` executes one evolution cycle via `.evolve/scripts/evolve.sh`
+5. `symevo run` executes one evolution cycle via `.evolve/scripts/evolve.sh`
 6. `evolve.sh` invokes the configured agent CLI to read vision/spec, build features, verify, commit
 7. Optionally: `--with-ci` (or `--mode ci`) installs GitHub Actions for auto-evolution
 
@@ -102,7 +102,7 @@ Installation and publishing are documented in [INSTALL.md](INSTALL.md).
 - **`.evolve/` namespace**: All framework files live in `.evolve/` to avoid polluting the project root
 - **`PROJECT_DIR=.`**: The project being built IS the repo root (not a subdirectory)
 - **`EVOLVE_DIR` env var**: All paths in `evolve.sh` are relative to this variable
-- **Templates shipped with npm package**: `init` copies from `node_modules/code-evolve/templates/`
+- **Templates shipped with npm package**: `init` copies from `node_modules/symevo/templates/`
 - **vision.md and spec.md in .evolve/**: User documents live alongside other state files to avoid filename collisions
 
 ## Protected Files (in templates)

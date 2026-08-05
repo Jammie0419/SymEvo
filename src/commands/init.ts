@@ -248,7 +248,7 @@ export async function runInit(options: InitOptions): Promise<void> {
     const ciProfile = wantCi ? getAgentCiProfile(agent) : null;
     if (wantCi && !ciProfile) {
       console.warn(
-        `  ⚠ Skipping GitHub Actions install: "${agent}" runs models locally and isn't supported on hosted CI runners. Use local execution (code-evolve start) for "${agent}".`
+        `  ⚠ Skipping GitHub Actions install: "${agent}" runs models locally and isn't supported on hosted CI runners. Use local execution (symevo start) for "${agent}".`
       );
       // Don't persist a CI mode we just refused to install — local is the only
       // viable mode for this backend, so reflect that in config.json/status.
@@ -271,7 +271,7 @@ export async function runInit(options: InitOptions): Promise<void> {
           // A same-named file already exists — leave it untouched, but make clear our
           // workflow was NOT installed so the user knows evolution/CI won't run from it.
           console.warn(
-            `  ⚠ ${path.relative(process.cwd(), destPath)} already exists — skipping; code-evolve's ${destName} was NOT installed (rename or remove the existing file to install it)`
+            `  ⚠ ${path.relative(process.cwd(), destPath)} already exists — skipping; symevo's ${destName} was NOT installed (rename or remove the existing file to install it)`
           );
         } else {
           // Template the cadence + agent into the evolve workflow before writing, so
@@ -291,7 +291,7 @@ export async function runInit(options: InitOptions): Promise<void> {
     // Install the local cron schedule for local/both modes. Native Windows has
     // no cron, so skip with a pointer to CI. We only install when the agent's
     // API key is already in the environment (or none is needed); otherwise the
-    // cron .env would be written without it — defer to `code-evolve start` once
+    // cron .env would be written without it — defer to `symevo start` once
     // the key is set, matching init's "set your key as a next step" model.
     let localScheduled = false;
     if (wantLocal) {
@@ -308,7 +308,7 @@ export async function runInit(options: InitOptions): Promise<void> {
             console.warn(`  ⚠ Could not install local cron job: ${(err as Error).message}`);
           }
         } else {
-          console.warn(`  ⚠ Local schedule not installed yet: ${envKey} is not set. Set it, then run \`code-evolve start\`.`);
+          console.warn(`  ⚠ Local schedule not installed yet: ${envKey} is not set. Set it, then run \`symevo start\`.`);
         }
       }
     }
@@ -330,7 +330,7 @@ export async function runInit(options: InitOptions): Promise<void> {
     }
 
     console.log('');
-    console.log('code-evolve initialized.');
+    console.log('symevo initialized.');
     console.log('');
 
     // On a TTY, offer to run the vision + spec interviews right now so onboarding
@@ -359,14 +359,14 @@ export async function runInit(options: InitOptions): Promise<void> {
     }
     console.log(`  ${step++}. ${getAgentEnvHint(agent, authMode)}`);
     if (localScheduled) {
-      console.log(`  ${step++}. Local evolution runs every ${hours}h. Run now: code-evolve run`);
+      console.log(`  ${step++}. Local evolution runs every ${hours}h. Run now: symevo run`);
     } else {
-      console.log(`  ${step++}. Run: code-evolve run`);
+      console.log(`  ${step++}. Run: symevo run`);
     }
     if (!wantCi || !wantLocal) {
       console.log('');
       console.log('  To choose where evolution runs (local / ci / both):');
-      console.log('    code-evolve init --mode <local|ci|both> --force');
+      console.log('    symevo init --mode <local|ci|both> --force');
     }
 }
 
@@ -400,7 +400,7 @@ function runInterview(name: 'vision' | 'spec'): boolean {
   const before = read();
   const res = spawnSync(process.execPath, [process.argv[1], name], { stdio: 'inherit' });
   if (res.status !== 0) {
-    console.warn(`  (${name} interview did not complete — run \`code-evolve ${name}\` anytime.)`);
+    console.warn(`  (${name} interview did not complete — run \`symevo ${name}\` anytime.)`);
   }
   const after = read();
   return after.trim() !== '' && after !== before;
@@ -409,7 +409,7 @@ function runInterview(name: 'vision' | 'spec'): boolean {
 /**
  * Template the bundled evolve.yml for the configured agent: the cron cadence, the
  * AGENT/MODEL job env, the CLI install step, and the secret env block (between the
- * `# code-evolve:secrets` markers). For the Claude default these replacements are
+ * `# symevo:secrets` markers). For the Claude default these replacements are
  * no-ops, so the workflow round-trips unchanged.
  */
 function templateEvolveWorkflow(
@@ -425,7 +425,7 @@ function templateEvolveWorkflow(
     .replace('npm install -g @anthropic-ai/claude-code', profile.cliInstall)
     // The secret block is repeated on each agent run step — replace every occurrence.
     .replace(
-      /^ *# code-evolve:secrets[\s\S]*?# code-evolve:secrets-end\n/gm,
+      /^ *# symevo:secrets[\s\S]*?# symevo:secrets-end\n/gm,
       profile.envBlock,
     );
 }
@@ -528,7 +528,7 @@ async function promptForInterval(fallback: number): Promise<number> {
 function updateGitignore(): void {
   const gitignorePath = projectFile('.gitignore');
   const linesToAdd = [
-    `# code-evolve ephemeral files`,
+    `# symevo ephemeral files`,
     `${EVOLVE_DIR_NAME}/ISSUES_TODAY.md`,
     `${EVOLVE_DIR_NAME}/ISSUE_RESPONSE.md`,
     `${EVOLVE_DIR_NAME}/.env`,

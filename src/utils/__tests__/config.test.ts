@@ -94,7 +94,7 @@ describe('getAgentCiProfile', () => {
     const claude = getAgentCiProfile('claude')!;
     expect(claude.cliInstall).toContain('@anthropic-ai/claude-code');
     expect(claude.envBlock).toContain('ANTHROPIC_API_KEY');
-    expect(claude.envBlock).toContain('# code-evolve:secrets');
+    expect(claude.envBlock).toContain('# symevo:secrets');
     expect(claude.secretHint).toContain('ANTHROPIC_API_KEY');
 
     const codex = getAgentCiProfile('codex')!;

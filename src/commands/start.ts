@@ -5,7 +5,7 @@ import path from 'path';
 import { getEvolveDir, isInitialized, EVOLVE_DIR_NAME } from '../utils/paths';
 import { readConfig, writeConfig, getAgentEnvKey, getAgentEnvHint, isValidAgent, getDefaultModel, AuthMode } from '../utils/config';
 
-const CRON_MARKER = 'code-evolve';
+const CRON_MARKER = 'symevo';
 
 /** Build the "every N hours" cron expression (top of the hour). */
 export function hourlyCron(hours: number): string {
@@ -34,7 +34,7 @@ export interface ScheduleOptions {
  * schedule.json (display-only metadata read by `status`/`stop` — the cron
  * expression is the only thing that gates run cadence; schedule.json never
  * does). Writes .evolve/.env capturing the current API key (if any).
- * Shared by `code-evolve start` and `code-evolve init --mode local|both`.
+ * Shared by `symevo start` and `symevo init --mode local|both`.
  * Throws if the crontab update fails. Does NOT validate env keys — callers
  * decide whether a missing key is fatal.
  */
@@ -51,7 +51,7 @@ export function installLocalSchedule(opts: ScheduleOptions): void {
   // Ensure .evolve/.env is gitignored
   ensureEnvGitignored(projectDir);
 
-  // Remove any existing code-evolve cron entry for this project
+  // Remove any existing symevo cron entry for this project
   removeExistingCron(projectDir);
 
   // Build cron expression
@@ -85,13 +85,13 @@ export const startCommand = new Command('start')
   .option('--agent <name>', 'Agent backend to use (overrides config)')
   .action(async (options: { every: string; model?: string; runNow?: boolean; agent?: string }) => {
     if (!isInitialized()) {
-      console.error('Not initialized. Run `code-evolve init` first.');
+      console.error('Not initialized. Run `symevo init` first.');
       process.exit(1);
     }
 
     if (process.platform === 'win32') {
       console.error('Local scheduling on native Windows is not supported.');
-      console.error('Use WSL, or set up GitHub Actions with: code-evolve init --with-ci');
+      console.error('Use WSL, or set up GitHub Actions with: symevo init --with-ci');
       process.exit(1);
     }
 
@@ -165,7 +165,7 @@ export const startCommand = new Command('start')
     } else {
       console.log('');
       console.log('Evolution engine started. The first cycle will run at the next cron interval.');
-      console.log('To run immediately: code-evolve run');
+      console.log('To run immediately: symevo run');
     }
   });
 

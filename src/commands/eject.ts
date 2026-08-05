@@ -4,14 +4,14 @@ import fs from 'fs';
 import readline from 'readline';
 import { getEvolveDir, projectFile, evolveFile, isInitialized, EVOLVE_DIR_NAME } from '../utils/paths';
 
-const CRON_MARKER = 'code-evolve';
+const CRON_MARKER = 'symevo';
 // Stable marker embedded in the workflow templates so eject recognizes files it
 // installed regardless of which package version wrote them (kept in sync with
 // templates/workflows/*.yml). A user's own same-named workflow won't contain it.
-const WORKFLOW_MARKER = 'code-evolve:managed';
+const WORKFLOW_MARKER = 'symevo:managed';
 
 export const ejectCommand = new Command('eject')
-  .description('Remove code-evolve framework, keep project files')
+  .description('Remove symevo framework, keep project files')
   .option('--yes', 'Skip confirmation prompt')
   .action(async (options: { yes?: boolean }) => {
     if (!isInitialized()) {
@@ -67,7 +67,7 @@ export const ejectCommand = new Command('eject')
         fs.rmSync(wfPath, { force: true });
         console.log(`Removed ${wf}`);
       } else {
-        console.log(`  ${wf} is not code-evolve-managed — leaving in place`);
+        console.log(`  ${wf} is not symevo-managed — leaving in place`);
       }
     }
     // We deliberately do NOT auto-remove a legacy .github/workflows/evolve/ subdir from
@@ -76,7 +76,7 @@ export const ejectCommand = new Command('eject')
     // risking data loss. If present, tell the user so they can delete it themselves.
     const legacyWorkflowDir = projectFile('.github/workflows/evolve');
     if (fs.existsSync(legacyWorkflowDir)) {
-      console.log('  Note: a legacy .github/workflows/evolve/ directory exists (inert) — remove it manually if it was code-evolve\'s.');
+      console.log('  Note: a legacy .github/workflows/evolve/ directory exists (inert) — remove it manually if it was symevo\'s.');
     }
 
     // Clean .gitignore entries
@@ -84,7 +84,7 @@ export const ejectCommand = new Command('eject')
     if (fs.existsSync(gitignorePath)) {
       let content = fs.readFileSync(gitignorePath, 'utf8');
       const linesToRemove = [
-        `# code-evolve ephemeral files`,
+        `# symevo ephemeral files`,
         `${EVOLVE_DIR_NAME}/ISSUES_TODAY.md`,
         `${EVOLVE_DIR_NAME}/ISSUE_RESPONSE.md`,
         `${EVOLVE_DIR_NAME}/.env`,

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Test: `code-evolve init --every <hours>` applies the chosen cadence to BOTH
+# Test: `symevo init --every <hours>` applies the chosen cadence to BOTH
 # the installed CI workflow (templated cron) and the local cron entry
 # (schedule.json). Also checks an invalid interval is rejected.
 # Regression test for issue #25 (P1.6).

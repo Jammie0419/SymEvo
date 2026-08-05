@@ -1,6 +1,6 @@
 #!/bin/bash
-# Test: `code-evolve spec` runs an interview and writes a populated .evolve/spec.md,
-# and `code-evolve spec --refine` reloads, edits, and preserves checkbox state.
+# Test: `symevo spec` runs an interview and writes a populated .evolve/spec.md,
+# and `symevo spec --refine` reloads, edits, and preserves checkbox state.
 # Regression test for issue #21 (P1.2).
 #
 # Drives the REAL compiled CLI over piped (non-TTY) stdin — no API key or agent needed.

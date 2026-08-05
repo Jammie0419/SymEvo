@@ -31,7 +31,7 @@ export const specCommand = new Command('spec')
 
     try {
       console.log('');
-      console.log('=== code-evolve: Spec Interview ===');
+      console.log('=== symevo: Spec Interview ===');
       console.log('');
       console.log("I'll ask about your tech stack, architecture, and features.");
       console.log('Answer naturally — short or long is fine. Say "skip" to move on.');
@@ -129,7 +129,7 @@ export const specCommand = new Command('spec')
       console.log('');
       console.log('Written to .evolve/spec.md');
       console.log('');
-      console.log('Next: run `code-evolve run` to start building the first feature.');
+      console.log('Next: run `symevo run` to start building the first feature.');
     } finally {
       rl.close();
     }

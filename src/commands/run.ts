@@ -12,7 +12,7 @@ export const runCommand = new Command('run')
   .option('--agent <name>', 'Agent backend to use (overrides config)')
   .action(async (options: { model?: string; timeout: string; force?: boolean; agent?: string }) => {
     if (!isInitialized()) {
-      console.error('Not initialized. Run `code-evolve init` first.');
+      console.error('Not initialized. Run `symevo init` first.');
       process.exit(1);
     }
 

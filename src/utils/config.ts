@@ -123,13 +123,13 @@ export interface AgentCiProfile {
 
 /**
  * Build the templated secret env block placed on each agent run step (between the
- * workflow's `# code-evolve:secrets` markers). Step-level `env:` is indented 10
+ * workflow's `# symevo:secrets` markers). Step-level `env:` is indented 10
  * spaces — keeping secrets off the job scope so third-party setup actions never see them.
  */
 function secretEnvBlock(lines: string[]): string {
   const indent = '          ';
   const body = lines.map((l) => `${indent}${l}`).join('\n');
-  return `${indent}# code-evolve:secrets — agent backend secrets (templated by init)\n${body}\n${indent}# code-evolve:secrets-end\n`;
+  return `${indent}# symevo:secrets — agent backend secrets (templated by init)\n${body}\n${indent}# symevo:secrets-end\n`;
 }
 
 export function getAgentCiProfile(agent: string): AgentCiProfile | null {

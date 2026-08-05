@@ -1,5 +1,5 @@
 #!/bin/bash
-# Test: `code-evolve vision`/`spec` draft via the configured agent adapter when one
+# Test: `symevo vision`/`spec` draft via the configured agent adapter when one
 # is available, and fall back to the static template when none is. Regression test
 # for issue #23 (P1.4 — LLM-driven interview).
 #

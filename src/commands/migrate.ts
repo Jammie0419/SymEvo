@@ -13,7 +13,7 @@ import {
 } from '../utils/migrate';
 
 export const migrateCommand = new Command('migrate')
-  .description('Convert an existing spec or vision document into code-evolve format')
+  .description('Convert an existing spec or vision document into symevo format')
   .argument('<type>', 'Document type: "spec" or "vision"')
   .argument('<source>', 'Path to the source document')
   .option('--yes', 'Write without confirmation prompt')
@@ -33,7 +33,7 @@ export const migrateCommand = new Command('migrate')
 
     // Warn if not initialized
     if (!isInitialized()) {
-      console.log('Warning: .evolve/ not initialized. Run `code-evolve init` first for full setup.');
+      console.log('Warning: .evolve/ not initialized. Run `symevo init` first for full setup.');
       console.log('Creating .evolve/ directory for output...');
       fs.mkdirSync(getEvolveDir(), { recursive: true });
     }

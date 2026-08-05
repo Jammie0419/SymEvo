@@ -30,7 +30,7 @@ export function draftWithAgent(prompt: string): string | null {
   // interview prompts can carry sensitive product details.
   let promptDir: string;
   try {
-    promptDir = fs.mkdtempSync(path.join(os.tmpdir(), 'code-evolve-draft-'));
+    promptDir = fs.mkdtempSync(path.join(os.tmpdir(), 'symevo-draft-'));
   } catch {
     return null;
   }

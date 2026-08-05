@@ -1,6 +1,6 @@
-# Installing code-evolve
+# Installing symevo
 
-This guide covers installing the `code-evolve` CLI, wiring up an AI agent, and
+This guide covers installing the `symevo` CLI, wiring up an AI agent, and
 verifying it works. For what the tool does and how the evolution loop runs, see
 the [README](README.md).
 
@@ -38,40 +38,40 @@ Pick the method that fits how you'll use it.
 Run it on demand; npm fetches the latest published version each time:
 
 ```bash
-npx code-evolve init
-npx code-evolve setup
+npx symevo init
+npx symevo setup
 ```
 
 ### Option B — Global install
 
-Installs `code-evolve` and its short alias `ce` on your `PATH`:
+Installs `symevo` and its short alias `se` on your `PATH`:
 
 ```bash
-npm install -g code-evolve
+npm install -g symevo
 
-code-evolve --version    # or: ce --version
-ce init
+symevo --version    # or: se --version
+se init
 ```
 
 Upgrade later with:
 
 ```bash
-npm update -g code-evolve
-ce init --force          # refresh framework files, preserves journal + learnings
+npm update -g symevo
+se init --force          # refresh framework files, preserves journal + learnings
 ```
 
 ### Option C — From source (contributors)
 
 ```bash
-git clone https://github.com/frankbria/code-evolve.git
-cd code-evolve
+git clone https://github.com/Jammie0419/SymEvo.git
+cd symevo
 npm install
 npm run build            # compiles TypeScript to dist/
-npm link                 # symlinks `code-evolve` and `ce` to this checkout
+npm link                 # symlinks `symevo` and `se` to this checkout
 ```
 
-Now `code-evolve` runs your local build. Use `npm run dev` for watch-mode
-recompilation while you work. `npm unlink -g code-evolve` removes the symlink.
+Now `symevo` runs your local build. Use `npm run dev` for watch-mode
+recompilation while you work. `npm unlink -g symevo` removes the symlink.
 
 ---
 
@@ -87,7 +87,7 @@ Two auth modes:
   ```
 - **OAuth** (Claude subscription, no API key) — local execution only:
   ```bash
-  code-evolve init --auth-mode oauth
+  symevo init --auth-mode oauth
   claude login
   ```
 
@@ -96,14 +96,14 @@ Two auth modes:
 ```bash
 export OPENAI_API_KEY=sk-...        # Codex
 # OpenCode: set the provider key your OpenCode config expects
-code-evolve init --agent codex      # or --agent opencode
+symevo init --agent codex      # or --agent opencode
 ```
 
 ### Ollama (no API key)
 
 ```bash
 ollama pull llama3
-code-evolve init --agent ollama
+symevo init --agent ollama
 ```
 
 The chosen `--agent` is saved to `.evolve/config.json`; later `run`/`start`
@@ -119,20 +119,20 @@ From inside the project you want to evolve:
 cd your-project
 
 # Guided front door: agent → interview → mode → schedule → ready
-code-evolve setup
+symevo setup
 
 # …or do it step by step:
-code-evolve init           # scaffold .evolve/
-code-evolve vision         # interview → .evolve/vision.md
-code-evolve spec           # interview → .evolve/spec.md
-code-evolve run            # run one cycle manually to verify
-code-evolve start          # turn on the scheduler (every 4h by default)
+symevo init           # scaffold .evolve/
+symevo vision         # interview → .evolve/vision.md
+symevo spec           # interview → .evolve/spec.md
+symevo run            # run one cycle manually to verify
+symevo start          # turn on the scheduler (every 4h by default)
 ```
 
 Check progress any time:
 
 ```bash
-code-evolve status
+symevo status
 ```
 
 ---
@@ -140,9 +140,9 @@ code-evolve status
 ## Verify the install
 
 ```bash
-code-evolve --version          # prints the version
-code-evolve --help             # lists all 11 commands
-code-evolve run                # runs a single evolution cycle end-to-end
+symevo --version          # prints the version
+symevo --help             # lists all 11 commands
+symevo run                # runs a single evolution cycle end-to-end
 ```
 
 A successful `run` reads your vision/spec, makes a change, verifies the build,
@@ -154,10 +154,10 @@ writes a journal entry (`.evolve/JOURNAL.md`), and commits.
 
 | Symptom | Fix |
 |---------|-----|
-| `code-evolve: command not found` after global install | Ensure npm's global bin is on `PATH` (`npm bin -g`); reopen your shell. |
-| `npx code-evolve` fetches an old version | `npx code-evolve@latest …` or install globally. |
+| `symevo: command not found` after global install | Ensure npm's global bin is on `PATH` (`npm bin -g`); reopen your shell. |
+| `npx symevo` fetches an old version | `npx symevo@latest …` or install globally. |
 | Agent CLI not found | Install the agent (see table above) and confirm `claude`/`codex`/`opencode`/`ollama` runs in your shell. |
-| Session aborts immediately on a brand-new repo | A repo with **zero commits** currently aborts on start ([#19](https://github.com/frankbria/code-evolve/issues/19)). Make one commit (`git commit --allow-empty -m init`) first. |
+| Session aborts immediately on a brand-new repo | A repo with **zero commits** currently aborts on start ([#19](https://github.com/Jammie0419/SymEvo/issues/19)). Make one commit (`git commit --allow-empty -m init`) first. |
 | Missing API key | `export ANTHROPIC_API_KEY=…` (or your agent's key), or use Claude `--auth-mode oauth`. |
 | Ollama with `--with-ci` | Not supported — Ollama runs models locally and isn't available on hosted CI runners. Use local execution. |
 
@@ -179,6 +179,6 @@ git push --follow-tags
 To test the tarball locally before publishing:
 
 ```bash
-npm pack                         # produces code-evolve-<version>.tgz
-npm install -g ./code-evolve-<version>.tgz
+npm pack                         # produces symevo-<version>.tgz
+npm install -g ./symevo-<version>.tgz
 ```

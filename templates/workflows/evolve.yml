@@ -1,4 +1,4 @@
-# code-evolve:managed — installed by `code-evolve init --with-ci`, removed by `code-evolve eject`. Safe to delete.
+# symevo:managed — installed by `symevo init --with-ci`, removed by `symevo eject`. Safe to delete.
 name: Evolution
 
 on:
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 150
     # Non-secret config is shared at job scope. AGENT/MODEL are templated by
-    # `code-evolve init` for the configured agent (values below are the Claude
+    # `symevo init` for the configured agent (values below are the Claude
     # defaults). Secrets are deliberately NOT here — they're scoped to the steps
     # that need them so third-party setup actions never see them.
     env:
@@ -81,18 +81,18 @@ jobs:
 
       - name: Configure git
         run: |
-          git config user.name "code-evolve[bot]"
-          git config user.email "code-evolve[bot]@users.noreply.github.com"
+          git config user.name "symevo[bot]"
+          git config user.email "symevo[bot]@users.noreply.github.com"
 
       - name: Run evolution session
         id: attempt1
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # code-evolve:secrets — agent backend secrets (templated by init)
+          # symevo:secrets — agent backend secrets (templated by init)
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           CLAUDE_AUTH_MODE: api-key
-          # code-evolve:secrets-end
+          # symevo:secrets-end
         run: |
           chmod +x .evolve/scripts/evolve.sh
           .evolve/scripts/evolve.sh
@@ -103,10 +103,10 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # code-evolve:secrets — agent backend secrets (templated by init)
+          # symevo:secrets — agent backend secrets (templated by init)
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           CLAUDE_AUTH_MODE: api-key
-          # code-evolve:secrets-end
+          # symevo:secrets-end
         run: |
           echo "Waiting 15 minutes before retry..."
           sleep 900
@@ -116,10 +116,10 @@ jobs:
         if: steps.attempt1.outcome == 'failure' && steps.attempt2.outcome == 'failure'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # code-evolve:secrets — agent backend secrets (templated by init)
+          # symevo:secrets — agent backend secrets (templated by init)
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           CLAUDE_AUTH_MODE: api-key
-          # code-evolve:secrets-end
+          # symevo:secrets-end
         run: |
           echo "Waiting 45 minutes before retry..."
           sleep 2700

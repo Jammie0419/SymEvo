@@ -3,7 +3,7 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 import { evolveFile, isInitialized } from '../utils/paths';
 
-const CRON_MARKER = 'code-evolve';
+const CRON_MARKER = 'symevo';
 
 export const stopCommand = new Command('stop')
   .description('Stop the evolution engine (removes the local cron job)')

@@ -3,7 +3,7 @@ import { isInitialized } from '../utils/paths';
 import { runInit, InitOptions } from './init';
 
 /**
- * `code-evolve setup` — the guided front door to onboarding. It runs the same
+ * `symevo setup` — the guided front door to onboarding. It runs the same
  * flow as `init` (agent/auth picker → execution mode → schedule → vision+spec
  * interview → summary), but is **re-runnable**: on an already-initialized repo
  * it auto-enables --force so a second run reconfigures instead of erroring.
@@ -18,10 +18,10 @@ export const setupCommand = new Command('setup')
   .option('--mode <mode>', 'Execution mode: local, ci, or both')
   .option('--every <hours>', 'Evolution cadence in hours (1–24)')
   .action(async (options: InitOptions) => {
-    console.log('🌱 code-evolve setup — one guided flow from nothing to a ready-to-evolve repo.\n');
+    console.log('🌱 symevo setup — one guided flow from nothing to a ready-to-evolve repo.\n');
     // Re-runnable: a second setup on an existing repo reconfigures rather than
     // aborting. init preserves JOURNAL/LEARNINGS/etc. under --force.
     if (isInitialized()) options.force = true;
     await runInit(options);
-    console.log("\n✅ You're live — code-evolve is configured and ready.");
+    console.log("\n✅ You're live — symevo is configured and ready.");
   });

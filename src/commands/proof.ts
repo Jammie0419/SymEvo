@@ -26,7 +26,7 @@ import { output } from '../utils/output';
 
 function requireInit(): void {
   if (!isInitialized()) {
-    console.error('Not initialized. Run `code-evolve init` first.');
+    console.error('Not initialized. Run `symevo init` first.');
     process.exit(1);
   }
 }

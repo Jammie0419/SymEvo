@@ -19,7 +19,7 @@ REQ format:
 REQs are created automatically from:
   - Session reverts (evolve.sh auto-capture)
   - GitHub issues addressed by the agent
-  - `code-evolve proof capture` (manual)
+  - `symevo proof capture` (manual)
   - Agent self-assessment during PHASE 4.5
 
 Evidence artifacts are stored in .evolve/evidence/REQ-XXXX/

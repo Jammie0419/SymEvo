@@ -143,7 +143,7 @@ export function buildAiSpecPrompt(sourceContent: string, codebaseFiles: string[]
     ? codebaseFiles.join('\n')
     : '(no project files yet)';
 
-  return `Convert the following document into a spec.md for the code-evolve framework.
+  return `Convert the following document into a spec.md for the symevo framework.
 
 Output ONLY the markdown content (no explanations, no code fences wrapping the whole output).
 
@@ -172,7 +172,7 @@ ${fileList}`;
  * Build the AI prompt for vision conversion.
  */
 export function buildAiVisionPrompt(sourceContent: string): string {
-  return `Convert the following document into a vision.md for the code-evolve framework.
+  return `Convert the following document into a vision.md for the symevo framework.
 
 Output ONLY the markdown content (no explanations, no code fences wrapping the whole output).
 

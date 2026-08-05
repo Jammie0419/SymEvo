@@ -1,5 +1,5 @@
 {
-  "name": "code-evolve",
+  "name": "symevo",
   "version": "0.2.0",
   "description": "Turn any project into a self-evolving codebase — autonomous build-and-improve cycles driven by Claude Code, Codex, OpenCode, or Ollama.",
   "keywords": [
@@ -18,17 +18,17 @@
   ],
   "author": "FRANK BRIA <frank@frankbria.com>",
   "license": "MIT",
-  "homepage": "https://github.com/frankbria/code-evolve#readme",
+  "homepage": "https://github.com/Jammie0419/SymEvo#readme",
   "bugs": {
-    "url": "https://github.com/frankbria/code-evolve/issues"
+    "url": "https://github.com/Jammie0419/SymEvo/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/frankbria/code-evolve"
+    "url": "https://github.com/Jammie0419/SymEvo"
   },
   "bin": {
-    "code-evolve": "./dist/cli.js",
-    "ce": "./dist/cli.js"
+    "symevo": "./dist/cli.js",
+    "se": "./dist/cli.js"
   },
   "main": "dist/cli.js",
   "files": [

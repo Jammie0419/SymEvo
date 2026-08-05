@@ -1,19 +1,19 @@
-# code-evolve
+# symevo
 
 **Describe what you want. Walk away. Come back to working software.**
 
-code-evolve is an autonomous project builder. Give it a vision and a technical spec, and it builds your project from scratch — then keeps improving it, session after session, commit after commit, day after day.
+symevo is an autonomous project builder. Give it a vision and a technical spec, and it builds your project from scratch — then keeps improving it, session after session, commit after commit, day after day.
 
 You define the *what* and *why*. The agent figures out the *how*.
 
-[![npm version](https://img.shields.io/npm/v/code-evolve.svg)](https://www.npmjs.com/package/code-evolve)
-[![license](https://img.shields.io/npm/l/code-evolve.svg)](https://github.com/frankbria/code-evolve/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/symevo.svg)](https://www.npmjs.com/package/symevo)
+[![license](https://img.shields.io/npm/l/symevo.svg)](https://github.com/Jammie0419/SymEvo/blob/main/LICENSE)
 
 ---
 
 ## The Idea
 
-Most AI coding tools wait for you to tell them what to do next. code-evolve doesn't wait. It reads your vision, checks the spec, looks at what's already built, decides what to work on, implements it, verifies the build passes, writes a journal entry about what it learned, and commits. Then it does it again. And again.
+Most AI coding tools wait for you to tell them what to do next. symevo doesn't wait. It reads your vision, checks the spec, looks at what's already built, decides what to work on, implements it, verifies the build passes, writes a journal entry about what it learned, and commits. Then it does it again. And again.
 
 Every 4 hours, your project gets a little closer to matching your vision.
 
@@ -36,7 +36,7 @@ Starting from scratch? Three steps:
 ### 1. Initialize
 
 ```bash
-npx code-evolve init
+npx symevo init
 ```
 
 This creates `.evolve/` with templates for your vision and spec.
@@ -48,8 +48,8 @@ You have three options — pick the one that fits:
 **Option A: Guided interview** (recommended for first-timers)
 
 ```bash
-code-evolve vision
-code-evolve spec
+symevo vision
+symevo spec
 ```
 
 `vision` runs five rounds of Socratic questions — what you're building, who it's for, what problem it solves, and what success looks like. `spec` then interviews you on tech stack, architecture, and a prioritized feature checklist. When an agent is configured (see [Multi-Agent Support](#multi-agent-support)), your configured LLM drafts the `.evolve/vision.md` / `.evolve/spec.md` from your answers and you can accept it or ask for a refinement; with no agent configured it falls back to a built-in template. Re-run either with `--refine` to revisit prior answers.
@@ -62,26 +62,26 @@ Edit `.evolve/vision.md` and `.evolve/spec.md` using the templates as a guide. T
 
 ```bash
 export ANTHROPIC_API_KEY=sk-...    # or the key for your chosen agent
-code-evolve start
+symevo start
 ```
 
 If you use a Claude subscription instead of an API key, initialize with `--auth-mode oauth` and run `claude login` — no `ANTHROPIC_API_KEY` needed.
 
 The engine runs on a schedule (every 4 hours by default) and starts building your project autonomously.
 
-> **Tip:** After installing globally (`npm install -g code-evolve`), you can use `ce` as a shorthand — `ce init`, `ce start`, `ce status`, etc.
+> **Tip:** After installing globally (`npm install -g symevo`), you can use `se` as a shorthand — `se init`, `se start`, `se status`, etc.
 
 ---
 
 ## Getting Started: Existing Project
 
-Already have a codebase and docs? code-evolve can adopt your project.
+Already have a codebase and docs? symevo can adopt your project.
 
 ### 1. Initialize
 
 ```bash
 cd your-project
-npx code-evolve init
+npx symevo init
 ```
 
 ### 2. Import your existing documents
@@ -89,22 +89,22 @@ npx code-evolve init
 If you already have a PRD, technical spec, or README with features listed:
 
 ```bash
-# Convert an existing spec document into code-evolve format
-code-evolve migrate spec ./docs/technical-spec.md
+# Convert an existing spec document into symevo format
+symevo migrate spec ./docs/technical-spec.md
 
 # AI-powered conversion (deeper analysis, cross-references your codebase)
-code-evolve migrate spec ./PRD.md --ai
+symevo migrate spec ./PRD.md --ai
 
 # Convert an existing overview into vision format
-code-evolve migrate vision ./docs/overview.md
+symevo migrate vision ./docs/overview.md
 ```
 
-The `migrate` command extracts features, tech stack, and architecture from your existing docs and formats them for code-evolve. Use `--ai` for smarter conversion that checks which features are already implemented.
+The `migrate` command extracts features, tech stack, and architecture from your existing docs and formats them for symevo. Use `--ai` for smarter conversion that checks which features are already implemented.
 
 You can also run the guided interview to refine an existing vision:
 
 ```bash
-code-evolve vision --refine
+symevo vision --refine
 ```
 
 This loads your current `.evolve/vision.md` and walks you through each section, showing your previous answers so you can update or keep them.
@@ -115,7 +115,7 @@ Check the generated files in `.evolve/`, make any adjustments, then:
 
 ```bash
 export ANTHROPIC_API_KEY=sk-...
-code-evolve start
+symevo start
 ```
 
 The agent picks up where your project left off — it reads the codebase, checks which spec features are already implemented, and starts working on what's missing.
@@ -155,21 +155,21 @@ The journal is the agent's memory across sessions. It reads its own history to a
 
 ## Commands
 
-All commands are available as both `code-evolve <cmd>` and `ce <cmd>`.
+All commands are available as both `symevo <cmd>` and `se <cmd>`.
 
 | Command | What it does |
 |---------|-------------|
-| `code-evolve setup` | Guided wizard: agent → interview → mode → schedule → ready (re-runnable) |
-| `code-evolve init` | Scaffold `.evolve/` with vision and spec templates |
-| `code-evolve vision` | Guided Socratic interview to generate `.evolve/vision.md` |
-| `code-evolve spec` | Guided interview to generate `.evolve/spec.md` |
-| `code-evolve migrate` | Convert an existing spec/vision document into code-evolve format |
-| `code-evolve start` | Turn on the evolution engine (local cron) |
-| `code-evolve stop` | Pause evolution |
-| `code-evolve run` | Run one cycle manually |
-| `code-evolve status` | Check progress — day count, features done, schedule |
-| `code-evolve eject` | Remove the framework, keep everything the agent built |
-| `code-evolve proof` | PROOF9 quality gates and requirements management ([docs](docs/PROOF9.md)) |
+| `symevo setup` | Guided wizard: agent → interview → mode → schedule → ready (re-runnable) |
+| `symevo init` | Scaffold `.evolve/` with vision and spec templates |
+| `symevo vision` | Guided Socratic interview to generate `.evolve/vision.md` |
+| `symevo spec` | Guided interview to generate `.evolve/spec.md` |
+| `symevo migrate` | Convert an existing spec/vision document into symevo format |
+| `symevo start` | Turn on the evolution engine (local cron) |
+| `symevo stop` | Pause evolution |
+| `symevo run` | Run one cycle manually |
+| `symevo status` | Check progress — day count, features done, schedule |
+| `symevo eject` | Remove the framework, keep everything the agent built |
+| `symevo proof` | PROOF9 quality gates and requirements management ([docs](docs/PROOF9.md)) |
 
 ### `setup`
 
@@ -180,59 +180,59 @@ live. Re-run it any time to reconfigure; it honors your existing config and
 preserves evolution history.
 
 ```bash
-code-evolve setup            # guided: nothing → fully configured, ready to evolve
-code-evolve setup --agent codex --mode ci --every 6   # same flags as init, non-interactive
+symevo setup            # guided: nothing → fully configured, ready to evolve
+symevo setup --agent codex --mode ci --every 6   # same flags as init, non-interactive
 ```
 
 ### `init`
 
 ```bash
-code-evolve init                          # on a terminal, prompts for agent + auth (Claude/api-key by default)
-code-evolve init --agent codex            # skip the prompt; use Codex CLI
-code-evolve init --auth-mode oauth        # use Claude subscription (claude login) instead of API key
-code-evolve init --with-ci               # also install GitHub Actions for cloud evolution
-code-evolve init --mode both             # choose where evolution runs: local | ci | both (persisted in config)
-code-evolve init --mode ci --every 6     # run every 6 hours (applies to both the CI cron and the local job)
-code-evolve init --force                 # upgrade framework files (preserves journal + learnings)
+symevo init                          # on a terminal, prompts for agent + auth (Claude/api-key by default)
+symevo init --agent codex            # skip the prompt; use Codex CLI
+symevo init --auth-mode oauth        # use Claude subscription (claude login) instead of API key
+symevo init --with-ci               # also install GitHub Actions for cloud evolution
+symevo init --mode both             # choose where evolution runs: local | ci | both (persisted in config)
+symevo init --mode ci --every 6     # run every 6 hours (applies to both the CI cron and the local job)
+symevo init --force                 # upgrade framework files (preserves journal + learnings)
 ```
 
-`--mode` is the unified execution-mode selector (also offered as an interactive prompt on a terminal). `local` installs a local cron job, `ci` installs the GitHub Actions workflows, `both` does both; the choice is persisted in `.evolve/config.json` and shown by `code-evolve status`. `--with-ci` remains as an alias for `--mode ci`. When `local`/`both` is chosen but the agent's API key isn't set yet, the cron job is deferred — set the key and run `code-evolve start`.
+`--mode` is the unified execution-mode selector (also offered as an interactive prompt on a terminal). `local` installs a local cron job, `ci` installs the GitHub Actions workflows, `both` does both; the choice is persisted in `.evolve/config.json` and shown by `symevo status`. `--with-ci` remains as an alias for `--mode ci`. When `local`/`both` is chosen but the agent's API key isn't set yet, the cron job is deferred — set the key and run `symevo start`.
 
 `--every <hours>` (1–24, default 4) sets the evolution cadence and is applied to **both** targets: the installed GitHub Actions `cron:` and the local cron entry. On a terminal it's also offered as a prompt when a schedule is being installed.
 
 ### `vision`
 
 ```bash
-code-evolve vision           # guided interview to create .evolve/vision.md
-code-evolve vision --refine  # revisit and improve an existing vision.md
+symevo vision           # guided interview to create .evolve/vision.md
+symevo vision --refine  # revisit and improve an existing vision.md
 ```
 
 ### `spec`
 
 ```bash
-code-evolve spec           # guided interview to create .evolve/spec.md
-code-evolve spec --refine  # revisit and improve an existing spec.md
+symevo spec           # guided interview to create .evolve/spec.md
+symevo spec --refine  # revisit and improve an existing spec.md
 ```
 
-On a terminal, `code-evolve init` offers to run the `vision` and `spec`
+On a terminal, `symevo init` offers to run the `vision` and `spec`
 interviews for you right after install — decline to edit the files by hand instead.
 
 ### `migrate`
 
 ```bash
-code-evolve migrate spec ./docs/technical-spec.md     # regex extraction (no API key needed)
-code-evolve migrate spec ./PRD.md --ai                # AI-powered conversion via claude CLI
-code-evolve migrate vision ./docs/overview.md         # convert to vision.md format
-code-evolve migrate spec ./README.md --ai --yes       # skip confirmation prompt
+symevo migrate spec ./docs/technical-spec.md     # regex extraction (no API key needed)
+symevo migrate spec ./PRD.md --ai                # AI-powered conversion via claude CLI
+symevo migrate vision ./docs/overview.md         # convert to vision.md format
+symevo migrate spec ./README.md --ai --yes       # skip confirmation prompt
 ```
 
 ### `start`
 
 ```bash
-code-evolve start                # every 4 hours (default)
-code-evolve start --every 2     # every 2 hours
-code-evolve start --run-now     # start now, then repeat on schedule
-code-evolve start --model claude-opus-4-6  # use a different model
+symevo start                # every 4 hours (default)
+symevo start --every 2     # every 2 hours
+symevo start --run-now     # start now, then repeat on schedule
+symevo start --model claude-opus-4-6  # use a different model
 ```
 
 ## What Your Project Looks Like
@@ -240,8 +240,8 @@ code-evolve start --model claude-opus-4-6  # use a different model
 ```
 my-project/
 ├── .evolve/
-│   ├── vision.md          ← you write this (or use `code-evolve vision`)
-│   ├── spec.md            ← you write this (or use `code-evolve migrate`)
+│   ├── vision.md          ← you write this (or use `symevo vision`)
+│   ├── spec.md            ← you write this (or use `symevo migrate`)
 │   ├── config.json        ← agent and model settings
 │   ├── scripts/           ← orchestration engine (protected)
 │   ├── skills/            ← agent behaviors (protected)
@@ -274,7 +274,7 @@ The agent implements them top to bottom. `[x]` = done. `[~]` = in progress. `[ ]
 
 ## Multi-Agent Support
 
-code-evolve works with multiple AI coding agents:
+symevo works with multiple AI coding agents:
 
 | Agent | CLI | Flag |
 |-------|-----|------|
@@ -284,10 +284,10 @@ code-evolve works with multiple AI coding agents:
 | Ollama | `ollama` | `--agent ollama` |
 
 ```bash
-code-evolve init --agent codex             # initialize with Codex
-code-evolve run --agent ollama             # one-off run with Ollama
-code-evolve start --agent opencode         # schedule with OpenCode
-code-evolve init --auth-mode oauth         # Claude subscription (no API key required)
+symevo init --agent codex             # initialize with Codex
+symevo run --agent ollama             # one-off run with Ollama
+symevo start --agent opencode         # schedule with OpenCode
+symevo init --auth-mode oauth         # Claude subscription (no API key required)
 ```
 
 The `--agent` flag on `init` is stored in `.evolve/config.json`. Subsequent `run` and `start` commands read from config automatically. You can override with `--agent` on any command.
@@ -300,7 +300,7 @@ The default model adapts to your agent (e.g., `llama3` for Ollama, `o4-mini` for
 
 ## Stack Detection
 
-Drop code-evolve into any project. It figures out how to build and test it:
+Drop symevo into any project. It figures out how to build and test it:
 
 | Stack | Detected by | Build | Test | Lint |
 |-------|------------|-------|------|------|
@@ -320,18 +320,18 @@ Drop code-evolve into any project. It figures out how to build and test it:
 Package managers (npm, yarn, pnpm, bun), Python tooling (uv, poetry, pip), and
 the Gradle wrapper (`./gradlew`) are detected automatically.
 
-**Monorepos** are supported automatically. If no stack marker is found at the project root, code-evolve scans immediate subdirectories. When multiple stacks are found (e.g., `backend/` with Python and `frontend/` with Next.js), each substack is verified independently — build, test, and lint run in their respective directories. The post-session fix loop and CI workflow both handle monorepos.
+**Monorepos** are supported automatically. If no stack marker is found at the project root, symevo scans immediate subdirectories. When multiple stacks are found (e.g., `backend/` with Python and `frontend/` with Next.js), each substack is verified independently — build, test, and lint run in their respective directories. The post-session fix loop and CI workflow both handle monorepos.
 
 ## Local vs. Cloud
 
 Run it however fits your workflow:
 
-**Local** — `code-evolve start`
+**Local** — `symevo start`
 - Cron job on your machine
 - API key stored securely in `.evolve/.env` (mode 600, gitignored)
 - Logs in `.evolve/evolve.log`
 
-**Cloud** — `code-evolve init --with-ci`
+**Cloud** — `symevo init --with-ci`
 - GitHub Actions installed as `.github/workflows/evolve.yml` and `evolve-ci.yml`
 - Runs every 4 hours with 3-attempt retry logic
 - The workflow is templated for your `--agent`: it installs the matching CLI, sets `AGENT`/`MODEL`, and wires the right secret. `init` prints the exact `gh secret set …` command for your backend (`ANTHROPIC_API_KEY` for Claude, `OPENAI_API_KEY` for Codex, the provider key for opencode). OAuth is local-only, so CI always uses `api-key` mode regardless of your local `--auth-mode`.
@@ -396,7 +396,7 @@ The agent is powerful but constrained:
 
 ## Review Before You Ship
 
-code-evolve is powered by AI, and AI-generated code requires human oversight before production use. The agent does its best — it writes tests, verifies builds, and journals its decisions — but it can introduce bugs, security vulnerabilities, or architectural choices that don't fit your context.
+symevo is powered by AI, and AI-generated code requires human oversight before production use. The agent does its best — it writes tests, verifies builds, and journals its decisions — but it can introduce bugs, security vulnerabilities, or architectural choices that don't fit your context.
 
 **Before deploying or publishing anything the agent built:**
 - Review the code changes (`git log`, `git diff`)
@@ -410,16 +410,16 @@ The evolution engine is a powerful accelerator, not a replacement for engineerin
 ## Upgrading
 
 ```bash
-npm update -g code-evolve
-code-evolve init --force     # updates engine, preserves your evolution history
-# or: ce init --force
+npm update -g symevo
+symevo init --force     # updates engine, preserves your evolution history
+# or: se init --force
 # Note: --force migrates root-level vision.md/spec.md into .evolve/ automatically
 ```
 
 ## Ejecting
 
 ```bash
-code-evolve eject    # or: ce eject
+symevo eject    # or: se eject
 ```
 
 Stops the engine, removes `.evolve/` and workflows. Your `vision.md` and `spec.md` are copied to the project root. Everything the agent built — your code, tests, docs — stays exactly where it is.
@@ -439,12 +439,12 @@ Why I built this: [I Built a Codebase That Builds Itself](https://lab.frankbria.
 ## Roadmap
 
 - **Skill/plugin format** — install as a Claude Code skill, Codex plugin, etc.
-- **GitHub Action** — `uses: frankbria/code-evolve@v1` for zero-install cloud evolution
-- **AI video demos** — auto-generate video walkthroughs of each evolution session ([#8](https://github.com/frankbria/code-evolve/issues/8))
+- **GitHub Action** — `uses: Jammie0419/SymEvo@v1` for zero-install cloud evolution
+- **AI video demos** — auto-generate video walkthroughs of each evolution session ([#8](https://github.com/Jammie0419/SymEvo/issues/8))
 
 ## Acknowledgments
 
-Built on the architecture pioneered by [yoyo-evolve](https://github.com/yologdev/yoyo-evolve) by [yologdev](https://github.com/yologdev). The core concepts — autonomous evolution loops, journal-driven memory, spec-driven feature prioritization, and build verification with automatic rollback — originate from that project. code-evolve packages these ideas into a drop-in CLI tool for any project.
+Built on the architecture pioneered by [yoyo-evolve](https://github.com/yologdev/yoyo-evolve) by [yologdev](https://github.com/yologdev). The core concepts — autonomous evolution loops, journal-driven memory, spec-driven feature prioritization, and build verification with automatic rollback — originate from that project. symevo packages these ideas into a drop-in CLI tool for any project.
 
 ## License
 

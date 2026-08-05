@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Drive `code-evolve init` under a real pty, answering its interactive prompts.
+"""Drive `symevo init` under a real pty, answering its interactive prompts.
 
 Spawns the compiled CLI with a controlling terminal (so init's `isTTY` checks
 are true), then feeds canned answers as each prompt appears. Two modes:

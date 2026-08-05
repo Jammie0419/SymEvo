@@ -1,5 +1,5 @@
 #!/bin/bash
-# Test: `code-evolve setup` is the guided onboarding front door to `init`, and is
+# Test: `symevo setup` is the guided onboarding front door to `init`, and is
 # re-runnable — a second `setup` on an already-initialized repo reconfigures
 # (auto --force) instead of erroring, and preserves evolution history/state.
 # Regression test for issue #26 (P1.7 — unified setup wizard).
@@ -29,10 +29,10 @@ export PATH="$STUB:$PATH"
 T1=$(mktemp -d)
 ( cd "$T1" && git init -q )
 OUT1=$( cd "$T1" && node "$CLI" setup </dev/null 2>&1 ) || true
-check "setup prints the wizard banner"      "$(echo "$OUT1" | grep -c 'code-evolve setup' || true)" "1"
+check "setup prints the wizard banner"      "$(echo "$OUT1" | grep -c 'symevo setup' || true)" "1"
 check "setup creates .evolve/"              "$( [ -d "$T1/.evolve" ] && echo yes || echo no )" "yes"
 check "setup prints the you're-live outro"  "$(echo "$OUT1" | grep -c "You're live" || true)" "1"
-check "setup ran the init flow"             "$(echo "$OUT1" | grep -c 'code-evolve initialized' || true)" "1"
+check "setup ran the init flow"             "$(echo "$OUT1" | grep -c 'symevo initialized' || true)" "1"
 
 # ── Case 2: re-running setup does NOT error and preserves state ──
 # Seed a marker in JOURNAL.md; a re-run must keep it (init preserves state on --force).

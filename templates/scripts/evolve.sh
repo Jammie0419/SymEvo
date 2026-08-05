@@ -1,5 +1,5 @@
 #!/bin/bash
-# .evolve/scripts/evolve.sh — One evolution cycle for code-evolve.
+# .evolve/scripts/evolve.sh — One evolution cycle for symevo.
 # Reads $EVOLVE_DIR/vision.md + $EVOLVE_DIR/spec.md, builds/improves the project, verifies, commits.
 #
 # Adapted from yoyo-evolve's evolve.sh. Key differences:
@@ -23,7 +23,7 @@
 set -euo pipefail
 
 # ── Configuration ──
-REPO="${REPO:-$(git remote get-url origin 2>/dev/null | sed 's|.*github.com[:/]||;s|\.git$||' || echo "owner/code-evolve")}"
+REPO="${REPO:-$(git remote get-url origin 2>/dev/null | sed 's|.*github.com[:/]||;s|\.git$||' || echo "owner/symevo")}"
 MODEL="${MODEL:-claude-sonnet-4-6}"
 TIMEOUT="${TIMEOUT:-3600}"
 EVOLVE_DIR="${EVOLVE_DIR:-.evolve}"
@@ -284,12 +284,12 @@ echo ""
 # Greenfield repos (fresh `git init`, zero commits) have no HEAD, which would
 # abort under `set -e`. Seed a baseline commit so revert/log logic has a valid base.
 if ! git rev-parse --verify -q HEAD >/dev/null 2>&1; then
-    git config user.name >/dev/null 2>&1 || git config user.name "code-evolve[bot]"
-    git config user.email >/dev/null 2>&1 || git config user.email "code-evolve[bot]@users.noreply.github.com"
+    git config user.name >/dev/null 2>&1 || git config user.name "symevo[bot]"
+    git config user.email >/dev/null 2>&1 || git config user.email "symevo[bot]@users.noreply.github.com"
     # Commit any existing files as the baseline so the revert/log logic can restore
     # pre-session state (--allow-empty covers the truly-empty case).
     git add -A
-    git commit -q --allow-empty -m "code-evolve: initial commit"
+    git commit -q --allow-empty -m "symevo: initial commit"
     echo "  Seeded initial commit (greenfield repo)"
 fi
 SESSION_START_SHA=$(git rev-parse HEAD)
@@ -348,7 +348,7 @@ PROMPT_FILE=$(mktemp)
 cat > "$PROMPT_FILE" <<PROMPT
 Today is Day $DAY ($DATE $SESSION_TIME).
 
-You are code-evolve, an autonomous project builder. Read these files in order:
+You are symevo, an autonomous project builder. Read these files in order:
 1. $EVOLVE_DIR/IDENTITY.md (who you are and your rules)
 2. $EVOLVE_DIR/vision.md (the project vision — your north star)
 3. $EVOLVE_DIR/spec.md (the technical specification — your blueprint)
@@ -652,7 +652,7 @@ if ! grep -q "## Day $DAY.*$SESSION_TIME" "$EVOLVE_DIR/JOURNAL.md" 2>/dev/null; 
 
     JOURNAL_PROMPT=$(mktemp)
     cat > "$JOURNAL_PROMPT" <<JEOF
-You are code-evolve, an autonomous project builder. You just finished an evolution session.
+You are symevo, an autonomous project builder. You just finished an evolution session.
 
 Today is Day $DAY ($DATE $SESSION_TIME).
 
@@ -694,7 +694,7 @@ if [ "$ISSUE_COUNT" -gt 0 ] && [ -n "$SESSION_COMMITS" ] && [ ! -f "$EVOLVE_DIR/
     echo "  Issues existed but no ISSUE_RESPONSE.md — running agent to write responses..."
     ISSUE_PROMPT=$(mktemp)
     cat > "$ISSUE_PROMPT" <<IEOF
-You are code-evolve. You just finished an evolution session on Day $DAY ($DATE $SESSION_TIME).
+You are symevo. You just finished an evolution session on Day $DAY ($DATE $SESSION_TIME).
 
 Available issues this session:
 $(cat "$ISSUES_FILE")
