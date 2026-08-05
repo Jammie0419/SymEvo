@@ -1,6 +1,6 @@
 # code-evolve — Injectability Status Report
 
-**Date:** 2026-06-29 (updated; original assessment 2026-06-28)
+**Date:** 2026-06-29 (updated; original assessment 2026-06-28; issue table synced to 0.2.0's shipped state on 2026-08-05 — all P0–P3 landed per CHANGELOG #36–#55)
 **Question:** How close is `code-evolve` to being an *installable function* that can be dropped into **any** GitHub repo — regardless of language or maturity — to "turn on" autonomous evolution, with a guided install that picks an LLM, interviews the user to produce the artifacts, and wires up local and/or GitHub Action execution on a chosen schedule?
 
 ---
@@ -35,9 +35,10 @@ CLIs, but a billed one-shot per backend hasn't been exercised in CI).
 | **Non-destructive install** | Workflows use skip-if-exists; `.gitignore` appended with a marker guard; state files preserved on re-init. Won't clobber an existing repo's files. |
 | **Local execution** | `code-evolve start` installs a real Unix **crontab** entry (survives reboots), writes a 0600 `.env`, gitignored. `stop` removes it cleanly. |
 | **CI execution** | `templates/workflows/evolve.yml` runs the engine on a cron + `workflow_dispatch` (but see P0.1). |
-| **Multi-agent architecture** | 4 adapters ship (claude/codex/ollama/opencode); selection via `--agent`, persisted to `config.json`, sourced by `evolve.sh`. Claude is complete end-to-end. |
-| **Vision interview** | `code-evolve vision` runs a 10-question interactive interview → `vision.md` (but hardcoded Q&A, undocumented, not linked to `init`). |
+| **Multi-agent architecture** | 4 adapters ship (claude/codex/ollama/opencode); selection via `--agent`, persisted to `config.json`, sourced by `evolve.sh`. All four verified against the current CLIs as of 0.2.0 (#50); Claude is the most exercised end-to-end. |
+| **Vision interview** | `code-evolve vision` runs a 10-question interactive interview → `vision.md`; LLM-drafted via the configured agent and offered right after `init` (#41, #42). |
 | **PROOF9** | Optional requirements-ledger / quality-gate subsystem. Not required for injectability. |
+| **Test suite** | Jest unit suite (19 tests) + 13 hermetic shell tests in `tests/` driving the real compiled CLI (jest runs in CI; shell tests target Linux/macOS/Git Bash + python3). |
 
 ---
 
@@ -49,24 +50,24 @@ CLIs, but a billed one-shot per backend hasn't been exercised in CI).
 
 ### 2. Guided installation (the "turn on" experience — the heart of the ask)
 - ~~No interactive **LLM/agent picker**; `init` silently defaults to `claude`/`api-key`.~~ **DONE** (#20) — `init` prompts for agent + auth on a TTY; flags/non-TTY skip it. → **P1.1**
-- No **spec generator** — `spec.md` is always hand-written. → **P1.2**
-- `init` never offers to generate artifacts; the `vision` interview is disconnected and undocumented. → **P1.3**
-- The interview is **hardcoded string Q&A, not the LLM interviewing the user**. → **P1.4**
-- No **execution-mode selector** (local / CI / both); `--with-ci` and `start` are disjoint, no persisted mode. → **P1.5**
+- ~~No **spec generator** — `spec.md` is always hand-written.~~ **DONE in #40** — `spec` command runs a guided interview. → **P1.2**
+- ~~`init` never offers to generate artifacts; the `vision` interview is disconnected and undocumented.~~ **DONE in #41** — `init` offers both interviews on a TTY. → **P1.3**
+- ~~The interview is **hardcoded string Q&A, not the LLM interviewing the user**.~~ **DONE in #42** — interviews draft via the configured agent, falling back to static templates. → **P1.4**
+- ~~No **execution-mode selector** (local / CI / both); `--with-ci` and `start` are disjoint, no persisted mode.~~ **DONE in #43** — `--mode local|ci|both` persisted in config. → **P1.5**
 - ~~**Schedule is not configurable at install**: local is `--every <hours>` only; CI cron is hardcoded `0 */4 * * *` in the template.~~ **RESOLVED in #44** — `code-evolve init --every <hours>` now applies the chosen cadence to both the templated CI `cron:` and the local cron entry (prompted on a TTY). → **P1.6 done**
-- No **unified setup wizard** chaining picker → interview → mode → schedule. → **P1.7**
+- ~~No **unified setup wizard** chaining picker → interview → mode → schedule.~~ **DONE in #45** — `setup` is re-runnable via auto-`--force`. → **P1.7**
 
 ### 3. Breadth & correctness (works on more repos, correctly)
 - ~~CI provisions only Node/Python toolchains — **Rust/Go/JVM builds fail in CI**.~~ **RESOLVED in #46** — both `ci.yml` and `evolve.yml` now detect the stack(s) up front and conditionally install Rust (`dtolnay/rust-toolchain`), Go (`actions/setup-go`), and Java/Kotlin (`actions/setup-java`) toolchains; monorepos install each needed one. Java/Kotlin gating is inert until detection lands (#28). → **P2.1 done**
-- Large class of stacks fall through to "unknown" (no verification): **Java/Kotlin, C#/.NET, Ruby, PHP, C/C++, Deno, static sites**. → **P2.2**
-- `evolve.sh` blindly appends `--quiet` to build/test commands → **false "build has issues" for Go/Make/pip**. → **P2.3**
+- ~~Large class of stacks fall through to "unknown" (no verification): **Java/Kotlin, C#/.NET, Ruby, PHP, C/C++, Deno, static sites**.~~ **DONE in #47** — detectors added for those stacks. → **P2.2**
+- ~~`evolve.sh` blindly appends `--quiet` to build/test commands → **false "build has issues" for Go/Make/pip**.~~ **DONE in #48** — invocation is stack-aware (no blind `--quiet`). → **P2.3**
 - ~~Agent **error detection is Claude-JSON-specific** (`evolve.sh:476`) — codex/ollama/opencode failures pass undetected.~~ **RESOLVED in #49** — the main session now captures `run_agent`'s real exit code (no longer masked by `tee`) and flags a failure on non-zero exit OR a per-adapter `agent_detect_error` marker (Claude keeps its `"type":"error"` grep; other adapters defer to exit code). → **P2.4 done**
 - ~~codex/opencode/ollama adapter invocations are **unverified against the real CLIs** (e.g. Codex now uses `codex exec`).~~ **RESOLVED in #50** — adapters rewritten and verified against the current CLIs: codex uses `codex exec -m … -s workspace-write --skip-git-repo-check`, opencode uses `opencode run -m provider/model`, ollama uses `ollama run MODEL` (stdin); each carries a pinned "verified against \<version\>" comment. → **P2.5 done**
-- Skills are greenfield/spec-driven; **no instruction to discover & honor an existing mature repo's conventions**. → **P2.6**
+- ~~Skills are greenfield/spec-driven; **no instruction to discover & honor an existing mature repo's conventions**.~~ **DONE in #51** — skills/IDENTITY honor an existing repo's conventions when the spec is blank. → **P2.6**
 
 ### 4. Package polish & accuracy
-- **`npm test` is broken** — jest declared but not installed, zero test files. → **P3.1**
-- **CLAUDE.md & package.json drift** — CLAUDE.md lists 4 commands (code ships 9) and flat skills (actually 5 dirs); package.json missing `keywords`/`homepage`/`bugs`. → **P3.2**
+- ~~**`npm test` is broken** — jest declared but not installed, zero test files.~~ **DONE in #53** — jest suite added (19 tests) and `npm test` fixed. → **P3.1**
+- ~~**CLAUDE.md & package.json drift** — CLAUDE.md lists 4 commands (code ships 9) and flat skills (actually 5 dirs); package.json missing `keywords`/`homepage`/`bugs`.~~ **DONE in #54/#55** — CLAUDE.md slimmed to import AGENTS.md; README command table completed. → **P3.2**
 - ~~**`schedule.json` is dead config** (written/displayed but never consumed); `--force` help text is misleading.~~ **RESOLVED in #35** — `schedule.json` documented as display-only metadata (read by `status`/`stop`; cron gates cadence, not this file); `--force` help corrected to "Bypass sponsor bonus-run gate". → **P3.3 done**
 
 ---
@@ -82,20 +83,20 @@ CLIs, but a billed one-shot per backend hasn't been exercised in CI).
 | P0.1 | [#18](https://github.com/frankbria/code-evolve/issues/18) ✅ | Blocker | Install GitHub Actions workflows into `.github/workflows/` so they actually run *(done in #36)* | — |
 | P0.2 | [#19](https://github.com/frankbria/code-evolve/issues/19) ✅ | Blocker | Handle zero-commit / greenfield repos without aborting the session *(done in #38)* | — |
 | P1.1 | [#20](https://github.com/frankbria/code-evolve/issues/20) ✅ | High | Interactive LLM/agent + auth picker on `init` *(done in #39)* | — |
-| P1.2 | [#21](https://github.com/frankbria/code-evolve/issues/21) | High | Add `spec` interview command to generate `spec.md` | — |
-| P1.3 | [#22](https://github.com/frankbria/code-evolve/issues/22) | High | Wire `init` to offer vision + spec generation after install | P1.1, P1.2 |
-| P1.4 | [#23](https://github.com/frankbria/code-evolve/issues/23) | High | Make the vision/spec interview LLM-driven via the chosen agent | P1.1 |
-| P1.5 | [#24](https://github.com/frankbria/code-evolve/issues/24) | High | Execution-mode selector (local / CI / both) persisted in config | — |
-| P1.6 | [#25](https://github.com/frankbria/code-evolve/issues/25) | High | Make the evolution schedule configurable at install (local + CI) | — |
-| P1.7 | [#26](https://github.com/frankbria/code-evolve/issues/26) | High | Unified `setup` wizard chaining picker → interview → mode → schedule | P1.1–P1.6 |
-| P2.1 | [#27](https://github.com/frankbria/code-evolve/issues/27) | Medium | Provision CI toolchains for the detected stack (Rust/Go/JVM) | — |
-| P2.2 | [#28](https://github.com/frankbria/code-evolve/issues/28) | Medium | Add stack detectors for Java/Kotlin, C#/.NET, Ruby, PHP, C/C++, Deno, static | — |
-| P2.3 | [#29](https://github.com/frankbria/code-evolve/issues/29) | Medium | Make build/test/format invocation stack-aware (drop blind `--quiet`) | — |
+| P1.2 | [#21](https://github.com/frankbria/code-evolve/issues/21) ✅ | High | Add `spec` interview command to generate `spec.md` *(done in #40)* | — |
+| P1.3 | [#22](https://github.com/frankbria/code-evolve/issues/22) ✅ | High | Wire `init` to offer vision + spec generation after install *(done in #41)* | P1.1, P1.2 |
+| P1.4 | [#23](https://github.com/frankbria/code-evolve/issues/23) ✅ | High | Make the vision/spec interview LLM-driven via the chosen agent *(done in #42)* | P1.1 |
+| P1.5 | [#24](https://github.com/frankbria/code-evolve/issues/24) ✅ | High | Execution-mode selector (local / CI / both) persisted in config *(done in #43)* | — |
+| P1.6 | [#25](https://github.com/frankbria/code-evolve/issues/25) ✅ | High | Make the evolution schedule configurable at install (local + CI) *(done in #44)* | — |
+| P1.7 | [#26](https://github.com/frankbria/code-evolve/issues/26) ✅ | High | Unified `setup` wizard chaining picker → interview → mode → schedule *(done in #45)* | P1.1–P1.6 |
+| P2.1 | [#27](https://github.com/frankbria/code-evolve/issues/27) ✅ | Medium | Provision CI toolchains for the detected stack (Rust/Go/JVM) *(done in #46)* | — |
+| P2.2 | [#28](https://github.com/frankbria/code-evolve/issues/28) ✅ | Medium | Add stack detectors for Java/Kotlin, C#/.NET, Ruby, PHP, C/C++, Deno, static *(done in #47)* | — |
+| P2.3 | [#29](https://github.com/frankbria/code-evolve/issues/29) ✅ | Medium | Make build/test/format invocation stack-aware (drop blind `--quiet`) *(done in #48)* | — |
 | P2.4 | [#30](https://github.com/frankbria/code-evolve/issues/30) ✅ | Medium | Per-adapter agent error detection (stop assuming Claude JSON) *(done in #49)* | — |
 | P2.5 | [#31](https://github.com/frankbria/code-evolve/issues/31) ✅ | Medium | Verify & fix codex/opencode/ollama adapter invocations vs real CLIs *(done in #50)* | — |
-| P2.6 | [#32](https://github.com/frankbria/code-evolve/issues/32) | Medium | Add a "respect existing repo conventions" pass for mature repos | — |
-| P3.1 | [#33](https://github.com/frankbria/code-evolve/issues/33) | Low | Add jest + first unit tests; fix the broken `npm test` | — |
-| P3.2 | [#34](https://github.com/frankbria/code-evolve/issues/34) | Low | Fix CLAUDE.md / package.json doc & metadata drift | — |
+| P2.6 | [#32](https://github.com/frankbria/code-evolve/issues/32) ✅ | Medium | Add a "respect existing repo conventions" pass for mature repos *(done in #51)* | — |
+| P3.1 | [#33](https://github.com/frankbria/code-evolve/issues/33) ✅ | Low | Add jest + first unit tests; fix the broken `npm test` *(done in #53)* | — |
+| P3.2 | [#34](https://github.com/frankbria/code-evolve/issues/34) ✅ | Low | Fix CLAUDE.md / package.json doc & metadata drift *(done in #54/#55)* | — |
 | P3.3 | [#35](https://github.com/frankbria/code-evolve/issues/35) ✅ | Low | Make `schedule.json` real or document it; fix misleading `--force` help *(done in #35)* | — |
 
 Priority = importance × dependency. Ship **P0** first (the feature is broken without it), then **P1** (the guided-install experience the project is actually about), then breadth (**P2**) and polish (**P3**).

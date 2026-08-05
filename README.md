@@ -339,6 +339,39 @@ Run it however fits your workflow:
 
 Both run the same engine. Mix and match.
 
+## CI Mode Checklist (Cloud Evolution Prerequisites)
+
+`--mode ci` (alias `--with-ci`) runs the engine on GitHub's own servers, so it can reach
+GitHub without anything installed on your machine — no local cron, bash, or API key
+needed locally. Before it can run, your GitHub repo needs four things:
+
+1. **The repo must be on GitHub.** Push the project (including the `.evolve/` scaffold
+   and `.github/workflows/` created by `init`) to a GitHub repo. The workflow only runs
+   from a GitHub-hosted repository.
+
+2. **Actions must be enabled.** Repo → `Settings` → `Actions` → `General` → make sure
+   "Allow all actions" is on. This is the default for new repos, but it is occasionally
+   disabled on private repos.
+
+3. **The agent's API key must exist as a repository secret.** Repo → `Settings` →
+   `Secrets and variables` → `Actions` → `New repository secret`:
+   - Claude Code → name `ANTHROPIC_API_KEY`
+   - Codex → name `OPENAI_API_KEY`
+   - OpenCode → name the provider key your config expects (`ANTHROPIC_API_KEY` or `OPENAI_API_KEY`)
+   - Ollama → not supported on hosted CI runners (use Local execution)
+   `init --mode ci` also prints the equivalent `gh secret set <NAME>` command for the
+   CLI route. OAuth auth is local-only, so CI always uses api-key mode.
+
+4. **Push once more after `init --mode ci`** so the workflow file is actually on GitHub.
+   A workflow that was never pushed simply doesn't exist — the `Actions` tab stays empty.
+
+Once all four are done, the first run starts on the next cron tick (default every 4h).
+To kick it off immediately: open the `Actions` tab, select the `Evolution` workflow, and
+click **Run workflow**.
+
+> Troubleshooting: `Actions` tab empty → step 4 (workflow never pushed). Run fails at
+> the agent step → step 3 (secret name doesn't match, or the key is invalid).
+
 ## Community Issues
 
 The agent reads GitHub issues tagged with special labels:
