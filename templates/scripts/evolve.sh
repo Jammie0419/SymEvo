@@ -344,9 +344,19 @@ if ! command -v timeout &>/dev/null; then
     fi
 fi
 
+# Detect platform so the agent writes code/commands that actually run here
+case "$(uname -s 2>/dev/null || echo unknown)" in
+    Linux*)   PLATFORM_LINE="Linux ($(uname -m 2>/dev/null || echo unknown))" ;;
+    Darwin*)  PLATFORM_LINE="macOS ($(uname -m 2>/dev/null || echo unknown))" ;;
+    MINGW*|MSYS*|CYGWIN*) PLATFORM_LINE="Windows (Git Bash/MSYS2)" ;;
+    *)        PLATFORM_LINE="$(uname -s 2>/dev/null || echo unknown)" ;;
+esac
+
 PROMPT_FILE=$(mktemp)
 cat > "$PROMPT_FILE" <<PROMPT
 Today is Day $DAY ($DATE $SESSION_TIME).
+
+You are running on: $PLATFORM_LINE. Write code and commands that actually work on this platform — on Windows, shell-invoked tools like \`npx\` are .cmd files (prefer execSync / explicit .cmd names), and paths/scripts must be cross-platform. Run the project's build/test commands to verify before committing.
 
 You are symevo, an autonomous project builder. Read these files in order:
 1. $EVOLVE_DIR/IDENTITY.md (who you are and your rules)
@@ -587,6 +597,7 @@ for s in json.load(sys.stdin):
             FIX_PROMPT=$(mktemp)
             cat > "$FIX_PROMPT" <<FIXEOF
 Your code has errors. Fix them NOW. Do not add features — only fix these errors.
+You are running on: $PLATFORM_LINE. Make sure commands you run actually work on this platform.
 
 $ERRORS
 

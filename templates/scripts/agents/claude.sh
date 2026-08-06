@@ -23,7 +23,7 @@ run_agent() {
 
     agent_auth_check || return 1
 
-    ${timeout_cmd:+$timeout_cmd "$timeout"} claude -p --model "$model" \
+    ${timeout_cmd:+$timeout_cmd "$timeout"} claude -p --permission-mode bypassPermissions --model "$model" \
         --allowedTools "Bash,Read,Write,Edit,Glob,Grep" \
         < "$prompt_file" 2>&1
 }
