@@ -41,3 +41,6 @@ coverage/
 
 # Personal docs added under docs/ (tracked originals PROOF9.md/STATUS.md are unaffected)
 docs/*
+
+# npm pack snapshot tarballs (symevo-x.y.z.tgz)
+snapshots/
