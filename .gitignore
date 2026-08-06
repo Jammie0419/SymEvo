@@ -2,6 +2,9 @@
 node_modules/
 dist/
 
+# npm pack snapshot tarballs (symevo-x.y.z.tgz)
+symevo-*.tgz
+
 # Ephemeral files generated during evolution
 ISSUES_TODAY.md
 ISSUE_RESPONSE.md
@@ -35,3 +38,6 @@ tasks/
 
 # jest coverage reports
 coverage/
+
+# Personal docs added under docs/ (tracked originals PROOF9.md/STATUS.md are unaffected)
+docs/*
